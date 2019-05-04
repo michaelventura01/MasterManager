@@ -1,0 +1,685 @@
+CREATE DATABASE registrosDocumentosDB;
+
+USE registrosDocumentosDB;
+
+CREATE TABLE EMPLEADOS(
+	codigoEmpleado VARCHAR(10) PRIMARY KEY,
+	identificacionEmpleado VARCHAR(12) UNIQUE NOT NULL,
+	nombreEmpleado TEXT NOT NULL,
+	apellidoEmpleado TEXT NOT NULL,
+	idIdentificacion INT NOT NULL,
+	telefonoEmpleado VARCHAR(10),
+	correoEmpleado TEXT,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE FACULTADES(
+	idFacultad VARCHAR(10) PRIMARY KEY,
+	nombreFacultad TEXT NOT NULL,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE AREAS(
+	idArea VARCHAR(10) PRIMARY KEY,
+	nombreArea TEXT NOT NULL,
+	idFacultad VARCHAR(10) NOT NULL,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE AREAEMPLEADOS(
+	idAreaEmpleado INT PRIMARY KEY auto_increment,
+	idArea VARCHAR(10) NOT NULL,
+	codigoEmpleado VARCHAR(10) NOT NULL,
+	idCargo INT NOT NULL,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE IDENTIFICACIONES(
+	idIdentificacion INT PRIMARY KEY auto_increment,
+	descripcionIdentificacion TEXT NOT NULL,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE DOCUMENTOS(
+	idDocumento INT PRIMARY KEY auto_increment,
+	descripcionDocumento TEXT NOT NULL,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE USUARIOS(
+	idUsuario INT PRIMARY KEY auto_increment,
+	descripcionUsuario TEXT NOT NULL,
+	claveUsuario TEXT NOT NULL,
+	idEstado INT NOT NULL,
+	idRol INT NOT NULL,
+	codigoEmpleado VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE ROLES(
+	idRol INT PRIMARY KEY auto_increment,
+	descripcionRol TEXT NOT NULL,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE EVENTOS(
+	idEvento VARCHAR(10) PRIMARY KEY,
+	idRecepcion VARCHAR(10) NOT NULL,
+	idEstado INT NOT NULL,
+	descripcionEvento TEXT NOT NULL,
+	idArea VARCHAR(10) NOT NULL,
+	horaEvento TIME NOT NULL,
+	fechaEvento DATE NOT NULL
+);
+
+CREATE TABLE ESTADOS(
+	idEstado INT PRIMARY KEY auto_increment,
+	descripcionEstado TEXT NOT NULL,
+	estado BIT NOT NULL
+);
+
+CREATE TABLE CONFIGURACIONES(
+	idConfiguracion INT PRIMARY KEY auto_increment,
+	idArea VARCHAR(10) NOT NULL,
+	actualizacion INT NOT NULL,
+	fuente TEXT NOT NULL,
+	tamanio INT NOT NULL,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE RECEPCIONES(
+	idRecepcion VARCHAR(10) PRIMARY KEY,
+	idDocumento INT NOT NULL, 
+	fechaRecepcion DATE NOT NULL,
+	horaRecepcion TIME NOT NULL,
+	idArea VARCHAR(10) NOT NULL,
+	descripcionRecepcion TEXT NOT NULL,
+	idEstado INT NOT NULL,
+	areaVia VARCHAR(10) NOT NULL,
+	codigoEmpleado VARCHAR(10) NOT NULL
+);
+CREATE TABLE CARGOS(
+	idCargo INT PRIMARY KEY auto_increment,
+	descripcionCargo TEXT NOT NULL,
+	idEstado INT NOT NULL
+);
+CREATE TABLE ENLACES(
+	idenlace INT PRIMARY KEY auto_increment,
+	nombreEnlace TEXT NOT NULL,
+	urlEnlace TEXT NOT NULL,
+	idEstado INT NOT NULL
+);
+
+CREATE TABLE ENLACESROLES(
+	idEnlaceRol INT PRIMARY KEY auto_increment,
+	idEnlace INT NOT NULL,
+	idRol INT NOT NULL
+);
+
+-- CONSTRAINTS
+
+ALTER TABLE EMPLEADOS
+ADD FOREIGN KEY (idIdentificacion) 
+REFERENCES IDENTIFICACIONES(idIdentificacion)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE EMPLEADOS
+ADD FOREIGN KEY (idEstado) 
+REFERENCES ESTADOS(idEstado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE AREAS
+ADD FOREIGN KEY (idFacultad)
+REFERENCES FACULTADES(idFacultad)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE AREAS
+ADD FOREIGN KEY (idEstado)
+REFERENCES ESTADOS(idEstado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE AREAEMPLEADOS
+ADD FOREIGN KEY(idArea)
+REFERENCES AREAS(idArea)
+ON DELETE CASCADE
+ON UPDATE CASCADE; 
+
+ALTER TABLE AREAEMPLEADOS
+ADD FOREIGN KEY(codigoEmpleado)
+REFERENCES EMPLEADOS(codigoEmpleado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE IDENTIFICACIONES
+ADD FOREIGN KEY(idEstado)
+REFERENCES ESTADOS(idEstado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;	
+
+ALTER TABLE AREAEMPLEADOS
+ADD FOREIGN KEY(idCargo)
+REFERENCES CARGOS(idCargo)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE AREAEMPLEADOS
+ADD FOREIGN KEY (idEstado) 
+REFERENCES ESTADOS(idEstado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE USUARIOS
+ADD FOREIGN KEY (idEstado)
+REFERENCES ESTADOS(idEstado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE USUARIOS
+ADD FOREIGN KEY(idRol)
+REFERENCES ROLES(idRol)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE USUARIOS
+ADD FOREIGN KEY (codigoEmpleado)
+REFERENCES EMPLEADOS(codigoEmpleado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE EVENTOS
+ADD FOREIGN KEY (idRecepcion)
+REFERENCES RECEPCIONES(idRecepcion)
+ON DELETE CASCADE
+ON UPDATE CASCADE; 
+
+ALTER TABLE EVENTOS
+ADD FOREIGN KEY(idEstado)
+REFERENCES ESTADOS(idEstado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE EVENTOS
+ADD FOREIGN KEY(idArea)
+REFERENCES AREAS(idArea)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE CONFIGURACIONES
+ADD FOREIGN KEY(idArea)
+REFERENCES AREAS(idArea)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE RECEPCIONES
+ADD FOREIGN KEY (idDocumento) 
+REFERENCES DOCUMENTOS(idDocumento)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+	
+ALTER TABLE RECEPCIONES	
+ADD FOREIGN KEY(idArea)
+REFERENCES AREAS(idArea)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE RECEPCIONES	
+ADD FOREIGN KEY(idEstado)
+REFERENCES ESTADOS(idEstado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE RECEPCIONES
+ADD FOREIGN KEY(areaVia)
+REFERENCES AREAS(idArea)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE RECEPCIONES	
+ADD FOREIGN KEY (codigoEmpleado)
+REFERENCES EMPLEADOS(codigoEmpleado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE ENLACES
+ADD FOREIGN KEY(idEstado)
+REFERENCES ESTADOS(idEstado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE ENLACESROLES
+ADD FOREIGN KEY(idEnlace)
+REFERENCES ENLACES(idEnlace)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+	
+ALTER TABLE ENLACESROLES	 
+ADD FOREIGN KEY(idRol)
+REFERENCES ROLES(idRol)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+-- procedures
+
+CREATE PROCEDURE `agregarEstado`(IN `nombre` TEXT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO ESTADOS(descripcionEstado, estado) 
+VALUES(nombre,1);
+
+call agregarEstado('activo');
+call agregarEstado('inactivo');
+
+CREATE PROCEDURE `editarEstado`(IN `nombre` TEXT, IN `id` INT, IN `estado` INT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE ESTADOS 
+SET descripcionEstado = nombre, estado = estado 
+WHERE idEstado = id;
+
+CREATE PROCEDURE `desactivarEstado`(IN `id` INT, IN `estado` INT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE ESTADOS 
+SET estado = estado 
+WHERE idEstado = id;
+
+CREATE PROCEDURE `eliminarEstado`(IN `id` INT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+DELETE FROM ESTADOS 
+WHERE idEstado = id;
+
+CREATE PROCEDURE `agregarFacultad`(IN `nombre` TEXT, IN `id` INT, IN `estado` INT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO FACULTADES(idFacultad, nombreFacultad, idEstado) 
+VALUES(id, nombre, estado);
+
+CREATE PROCEDURE `editarFacultad`(IN `nombre` TEXT, IN `id` INT, IN `estado` INT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE FACULTADES
+SET nombreFacultad = nombre , idEstado = estado 
+WHERE idFacultad = id;
+
+CREATE PROCEDURE `desactivarFacultad`(IN `id` INT, IN `estado` INT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE FACULTADES
+SET idEstado = estado 
+WHERE idFacultad = id;
+
+CREATE PROCEDURE agregarArea(IN `nombre` TEXT, IN `id` varchar(10), IN `idFacultad` varchar(10), IN `estado` INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO AREAS(idArea, nombreArea, idFacultad, idEstado)
+VALUES(id, nombre, idFacultad, estado);
+
+CREATE PROCEDURE editarArea(IN `nombre` TEXT, IN `id` varchar(10), IN `idFacultad` varchar(10), IN `estado` INT, IN `idarea` varchar(10))
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE AREAS
+SET idArea = id, nombreArea = nombre, idFacultad = idFacultad, idEstado = estado
+WHERE idArea = idarea;
+
+CREATE PROCEDURE desactivarArea(IN `estado` INT, IN `idarea` varchar(10))
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE AREAS
+SET idEstado = estado
+WHERE idArea = idarea;
+
+CREATE PROCEDURE agregarDocumento(IN nombre TEXT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO  DOCUMENTOS(descripcionDocumento, idEstado)
+VALUES (nombre, estado);
+
+CREATE PROCEDURE editarDocumento(IN nombre TEXT, IN id INT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE  DOCUMENTOS
+SET	descripcionDocumento = nombre, idEstado = estado
+WHERE idDocumento = id;
+
+CREATE PROCEDURE desactivarDocumento (IN id INT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE  DOCUMENTOS
+SET idEstado = estado
+WHERE idDocumento = id;
+
+CREATE PROCEDURE agregarIdentificacion(in identificacion text, in estado int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO IDENTIFICACIONES(descripcionIdentificacion, idEstado)
+VALUES (identificacion, estado);
+
+CREATE PROCEDURE editarIdentificacion(in identificacion text, in estado int, in ididentificacion int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE IDENTIFICACIONES
+SET descripcionIdentificacion = identificacion, idEstado = estado 
+WHERE idIdentificacion = ididentificacion;
+
+CREATE PROCEDURE desactivarIdentificacion(in estado int, in ididentificacion int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE IDENTIFICACIONES
+SET idEstado = estado 
+WHERE idIdentificacion = ididentificacion;
+
+CREATE PROCEDURE agregarRoles(IN nombre TEXT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO ROLES(descripcionRol, idEstado)
+VALUES(nombre, estado);
+
+CREATE PROCEDURE editarRoles(IN nombre TEXT, IN id INT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE ROLES
+SET descripcionRol = nombre, idEstado = estado
+WHERE idRol = id;
+
+CREATE PROCEDURE desactivarRoles(IN id INT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE ROLES
+SET idEstado = estado
+WHERE idRol = id;
+call agregarRoles('ADMINISTRADOR',1);
+call agregarRoles('USUARIO',1);
+	
+CREATE PROCEDURE agregarCargos(IN nombre TEXT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO CARGOS(descripcionCargo, idEstado)
+VALUES(nombre, estado);
+
+CREATE PROCEDURE editarCargos(IN nombre TEXT, IN id INT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE CARGOS
+SET descripcionCargo = nombre, idEstado = estado
+WHERE idCargo = id;
+
+CREATE PROCEDURE desactivarCargos(IN id INT, in estado INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE CARGOS
+SET idEstado = estado
+WHERE idCargo = id;
+
+CREATE PROCEDURE agregarEmpleado(IN codigo varchar(10), IN identificacion varchar(12), in nombre text, in apellido text, in idIdentificacion int, in telefono varchar(10), in correo text)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO EMPLEADOS(codigoEmpleado, identificacionEmpleado, nombreEmpleado, apellidoEmpleado, idIdentificacion, telefonoEmpleado, correoEmpleado, idEstado)
+VALUES(codigo, identificacion, nombre, apellido, idIdentificacion, telefono, correo, 1);
+
+CREATE PROCEDURE editarEmpleado(IN codigo varchar(10), IN identificacion varchar(12), in nombre text, in apellido text, in ididentificacion int, in telefono varchar(10), in correo text, in estado int, in codigoEmp varchar(10))
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE EMPLEADOS
+SET	codigoEmpleado = codigo, identificacionEmpleado = identificacion, nombreEmpleado = nombre, apellidoEmpleado = apellido, idIdentificacion = ididentificacion, telefonoEmpleado = telefono, correoEmpleado = correo, idEstado = estado
+WHERE codigoEmpleado = codigoEmp;
+
+CREATE PROCEDURE desactivarEmpleado(IN codigo varchar(10), IN estado int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE EMPLEADOS
+SET idEstado = estado
+WHERE codigoEmpleado = codigo; 
+
+CREATE PROCEDURE agregarAreaEmpleado(IN area varchar(10), IN empleado varchar(10), in cargo int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO INSTITUTOSEMPLEADOS(idArea, codigoEmpleado, idCargo, idEstado)
+VALUES (area, empleado, cargo, 1);
+
+CREATE PROCEDURE editarAreaEmpleado(IN area varchar(10), IN empleado varchar(10), in cargo int, in estado int ,in id INT)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE INSTITUTOSEMPLEADOS
+SET idArea = area, codigoEmpleado = empleado, idCargo = cargo, idEstado = estado
+WHERE idAreaEmpleado = id;
+
+CREATE PROCEDURE desactivarInstitutoEmpleado(IN estado int, IN id int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE INSTITUTOSEMPLEADOS
+SET idEstado = estado
+WHERE idAreaEmpleado = id;
+
+CREATE PROCEDURE agregarUsuario(IN user TEXT, IN pass TEXT, in rol int, in empleado varchar(10) )
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO USUARIOS(descripcionUsuaruario, claveUsuario, idEstado, idRol, codigoEmpleado)
+VALUES(user, pass, 1, rol, empleado);
+
+CREATE PROCEDURE editarUsuario(IN id INT, IN user TEXT, IN pass TEXT, IN estado INT, in rol int, in empleado varchar(10) )
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE USUARIOS
+SET descripcionUsuaruario = user, claveUsuario = pass, idEstado = estado, idRol = rol, codigoEmpleado = empleado
+WHERE idUsuario = id;
+
+CREATE PROCEDURE desactivarUsuario(in id int, in estado int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE USUARIOS
+SET idEstado = estado
+WHERE idUsuario = id;
+
+CREATE PROCEDURE empleadoUsuarioAgregar(IN codigo varchar(10), IN identificacion varchar(12),in tipoidentificacion TEXT, in nombre text, in apellido text,  in telefono varchar(10), in correo text, IN user TEXT, IN pass TEXT, in tiporol text, IN nombrearea text, in tipocargo text)
+BEGIN
+	DECLARE ididentificacion int; 
+	DECLARE area int;
+	DECLARE cargo int;  
+	DECLARE rol int; 
+
+	SELECT idIdentificacion INTO ididentificacion 
+	FROM IDENTIFICACIONES 
+	WHERE descripcionIdentificacion = tipoidentificacion; 
+
+	SELECT idRol INTO rol 
+	FROM ROLES 
+	WHERE descripcionRol = tiporol;
+
+	SELECT idArea INTO area 
+	FROM AREAS 
+	WHERE nombreArea = nombrearea;
+
+	SELECT idCargo INTO cargo 
+	FROM CARGOS 
+	WHERE descripcionCargo = tipocargo;
+
+
+
+	call agregarEmpleado(codigo, identificacion, nombre, apellido, ididentificacion,telefono, correo);
+
+	call agregarAreaEmpleado(area, codigo, cargo);
+
+	call agregarUsuario(user, pass, rol, codigo );
+END;
+
+
+CREATE DEFINER = `root`@`localhost` PROCEDURE `desactivarEmpleadoUsuario`(IN `codigoempleado` VARCHAR(10), IN `idusuario` VARCHAR(10), IN `estado` INT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+BEGIN 
+	call desactivarEmpleado(codigoempleado, estado); 
+	call desactivarUsuario(idusuario, estado); 
+END;
+
+CREATE PROCEDURE agregarEvento(in evento varchar(10), in recepcion varchar(10), in estado int, in descripcion text, in area varchar(10), IN hora time, in fecha date)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
+INSERT INTO EVENTOS(idEvento, idRecepcion, idEstado, descripcionEvento, idArea, horaEvento, fechaEvento)
+VALUES(evento, recepcion, estado, descripcion, area, hora, fecha);
+
+CREATE PROCEDURE editarEvento(in evento varchar(10), in recepcion varchar(10), in estado int, in descripcion text, in area varchar(10), in idevento varchar(10), IN hora time, in fecha date)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
+UPDATE EVENTOS
+SET idEvento = evento, idRecepcion = recepcion, idEstado = estado, descripcionEvento = descripcion, idArea = area, horaEvento = hora, fechaEvento = fecha
+WHERE idEvento = idevento;
+
+CREATE PROCEDURE desactivarEvento(in evento varchar(10), in estado int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
+UPDATE EVENTOS
+SET idEstado = estado
+WHERE idEvento = evento;
+
+CREATE PROCEDURE agregarEnlace(IN nombre text, in enlace text, in estado int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
+INSERT INTO ENLACES(nombreEnlace, urlEnlace, idEstado)
+VALUES(nombre, enlace, estado);
+	
+CREATE PROCEDURE editarEnlace(IN id INT, IN nombre text, in enlace text, in estado int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
+update ENLACES
+SET idEstado = estado, urlEnlace = enlace, nombreEnlace = nombre
+WHERE idEnlace = id;
+
+CREATE PROCEDURE desactivarEnlace(IN id text, in estado int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
+update ENLACES
+SET idEstado = estado
+WHERE idEnlace = id;
+
+CREATE PROCEDURE agrgegarEnlacesRoles(in enlace int, in rol int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
+INSERT INTO ENLACESROLES(idEnlace, idRol)
+VALUES(enlace, rol);
+
+CREATE PROCEDURE editarEnlacesRoles(in id int, in enlace int, in rol int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
+UPDATE ENLACESROLES
+SET idEnlace = enlace, idRol = rol
+WHERE idEnlaceRol = id;
+
+CREATE PROCEDURE `enlacerolagregar`(IN `nombre` TEXT, IN `enlace` TEXT, IN `estado` INT, IN `rol` INT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+BEGIN 
+	DECLARE idenlace int; 
+	SELECT idEnlace INTO idenlace 
+	FROM ENLACES 
+	WHERE urlEnlace = enlace 
+	AND nombreEnlace = nombre; 
+	call agregarEnlace(nombre, enlace, estado); 
+	call agrgegarEnlacesRoles(idenlace, rol);
+END;
+
+
+CREATE PROCEDURE agregarRecepcion(in idrecepcion varchar(10), in documento int, in fecha date, in hora time, in area varchar(10), in desrec text, in estado int, in instvia varchar(10), in empleado varchar(10))
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+INSERT INTO RECEPCIONES(idRecepcion, idDocumento, fechaRecepcion, horaRecepcion, idArea ,descripcionRecepcion ,idEstado, institutoVia, codigoEmpleado)
+VALUES(idrecepcion, documento, fecha, hora, area, desrec, estado, instvia, empleado);
+
+CREATE PROCEDURE editarRecepcion(in id varchar(10), in idrecepcion varchar(10), in documento int, in fecha date, in hora time, in area varchar(10), in desrec text, in estado int, in instvia varchar(10), in empleado varchar(10))
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE RECEPCIONES
+SET idRecepcion = idrecepcion, idDocumento = documento, fechaRecepcion = fecha,	horaRecepcion = hora, idArea = area, descripcionRecepcion = desrec, idEstado = estado, institutoVia = instvia, codigoEmpleado = empleado
+WHERE idRecepcion = id;
+
+CREATE PROCEDURE desactivarRecepcion(in idrecepcion varchar(10), in estado int)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+UPDATE RECEPCIONES
+SET idEstado = estado
+WHERE idRecepcion = idrecepcion;
+
+-- aqui
+CREATE PROCEDURE `recepcionEventoAgregar`(IN `idrecepcion` VARCHAR(10), IN `evento` VARCHAR(10), IN `descEven` TEXT, IN `tipodocumento` TEXT, IN `fecha` DATE, IN `hora` TIME, IN `nombrearea` TEXT, IN `desrec` TEXT, IN `tipoestado` TEXT, IN `areavia` text, IN `empleado` VARCHAR(10)) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+BEGIN 
+	DECLARE documento int; 
+	DECLARE estado int; 
+	DECLARE area varchar(10); 
+	DECLARE via varchar(10);
+	SELECT idDocumento INTO documento 
+	FROM DOCUMENTOS 
+	WHERE descripcionDocumento = tipodocumento; 
+	SELECT idEstado INTO estado 
+	FROM ESTADOS
+	WHERE descripcionEstado = tipoestado; 
+	SELECT idArea INTO area 
+	FROM INSTITUTOS 
+	WHERE nombreArea = nombrearea; 
+	SELECT idArea INTO via 
+	FROM INSTITUTOS 
+	WHERE nombreArea = areavia;
+	call agregarRecepcion(idrecepcion, documento, fecha, hora, area, desrec, estado, via, empleado); 
+	call agregarEvento(evento, idrecepcion, estado, descEven, area, hora, fecha); 
+END;
+
+
+
+SELECT 
+	empleado.`codigoEmpleado` 'codigoempleado',
+    empleado.`identificacionEmpleado` 'identificacionempleado',
+    identificacion.descripcionIdentificacion 'tipoidentificacion',
+    empleado.`nombreEmpleado` 'nombreempleado',
+    empleado.`apellidoEmpleado` 'apellidoempleado',
+    empleado.`telefonoEmpleado` 'telefonoempleado',
+    empleado.`correoEmpleado` 'correoempleado'
+FROM `empleados` empleado
+inner join identificaciones identificacion on empleado.idIdentificacion = identificacion.idIdentificacion
+inner join estados estado on empleado.idEstado = estado.idEstado;
+
+SELECT 
+	usuario.`descripcionUsuario` 'user',
+    usuario.`claveUsuario` 'password',
+    estado.descripcionEstado 'estado',
+    rol.descripcionRol 'rolusuario',
+    empleado.nombreEmpleado 'nombreempleado',
+    empleado.apellidoEmpleado 'apellidoempleado',
+    empleado.codigoEmpleado 'codigoempleado'
+FROM `usuarios` usuario 
+inner join estados estado on usuario.idEstado = estado.idEstado
+inner join roles rol on usuario.idRol = rol.idRol
+inner join empleados empleado on usuario.codigoEmpleado = empleado.codigoEmpleado;
+
+
+SELECT 
+	area.nombreArea 'area',
+    area.idArea 'codigoarea',
+    facultad.nombreFacultad 'facultad',
+    facultad.idFacultad 'codigofacultad',
+    empleado.codigoEmpleado 'codigoempleado',
+    empleado.nombreEmpleado 'nombreempleado',
+    empleado.apellidoEmpleado 'apellidoempleado',
+    empleado.identificacionEmpleado 'identificacionempleado',
+    identificacion.descripcionIdentificacion 'tipoidentificacion',
+    empleado.telefonoEmpleado 'telefonoempleado',
+    empleado.correoEmpleado 'correoempleado',
+    cargo.descripcionCargo 'cargoempleado',
+    estado.idEstado 'estado'
+FROM `areaempleados` areaemp 
+inner join areas area on areaemp.idArea = area.nombreArea
+inner join facultades facultad on area.idFacultad = facultad.idFacultad
+inner join empleados empleado on areaemp.codigoEmpleado = empleado.codigoEmpleado
+inner join cargos cargo on areaemp.idCargo = cargo.idCargo
+inner join estados estado on areaemp.idEstado = estado.idEstado
+inner join identificaciones identificacion on empleado.idIdentificacion = identificacion.idIdentificacion;
+
+
+SELECT 
+	recepcion.idRecepcion 'codigoDocumento'
+	recepcion.descripcionRecepcion 'descripcion',
+    recepcion.fechaRecepcion 'fecha',
+    recepcion.horaRecepcion 'hora',
+    documento.descripcionDocumento 'documento',
+    area.nombreArea 'AreaRecive',
+    facultad.nombreFacultad 'facultadRecive',
+    estado.descripcionEstado 'estado',
+    via.nombreArea 'areaVia',
+    facultadvia.nombreFacultad 'facultadVia',
+    empleado.codigoEmpleado 'codigoEmpleadoVia',
+    empleado.nombreEmpleado 'nombreEmpleadoVia',
+    empleado.apellidoEmpleado 'apellidoEmpleadoVia'
+FROM `recepciones` recepcion
+inner join documentos documento on recepcion.idDocumento = documento.idDocumento
+inner join areas area on recepcion.idArea = area.idArea
+inner join estados estado on recepcion.idEstado = estado.idEstado
+inner join areas via on recepcion.areaVia = via.idArea
+inner join empleados empleado on recepcion.codigoEmpleado = empleado.codigoEmpleado
+inner join facultades facultad on area.idFacultad = facultad.idFacultad
+inner join facultades facultadvia on via.idFacultad = facultadvia.nombreFacultad;
+
+SELECT 
+	evento.horaEvento 'horaevento',
+    evento.fechaEvento 'fechaevento',
+    evento.descripcionEvento 'decripcionevento',
+    recepcion.idRecepcion 'codigodocumento',
+    recepcion.descripcionRecepcion 'documento',
+    recepcion.fechaRecepcion 'fechadocumento',
+    recepcion.horaRecepcion 'horadocumento',
+    estadorecepcion.descripcionEstado 'estadodocumento',
+    estadoevento.descripcionEstado 'estadoevento',
+    area.nombreArea 'areaevento'
+FROM `eventos` evento
+inner join recepciones recepcion on evento.idrecepcion = recepcion.idRecepcion
+inner join estados estadoevento on evento.idestado = estadoevento.idEstado
+inner join areas area on evento.idarea = area.idArea
+inner join estados estadorecepcion on recepcion.idEstado = estadorecepcion.idEstado
+
+
+
+CREATE TABLE CONFIGURACIONES(
+	idConfiguracion INT PRIMARY KEY auto_increment,
+	idInstituto VARCHAR(10) NOT NULL,
+	actualizacion INT NOT NULL,
+	fuente TEXT NOT NULL,
+	tamanio INT NOT NULL,
+	idEstado INT NOT NULL
+);

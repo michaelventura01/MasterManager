@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-80">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Formulario Agregar ConfiguracionFacultad</title>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/jquery-3.4.0.min.js"></script>
+        <script src="js/script.js"></script>
+        <script src="js/SweetAlert.js"></script>
+    </head>
+    <body>
+        <div class="row">
+            <style>
+                .row{
+                    margin: 4%;
+                }    
+            </style>
+            <div class="col-4">
+                <form action="form">
+                    <div class="form-group">
+                        <label>Nombre de Facultad<label style="color:red;">*</label></label>
+                        <input type="text" name="txtNombre" id="txtNombre" class="form-control" placeholder="Nombre">
+                        <label id="completar" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Código de Facultad<label style="color:red;">*</label></label>
+                        <input type="text" name="txtCodigoFacultad" id="txtCodigoFacultad" maxlength="10" class="form-control" placeholder="Código">
+                        <label id="completar1" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Emil<label style="color:red;">*</label></label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">
+                                    <img src="./icon/sobre.png" alt="">
+                                </span>
+                            </div>
+                            <input type="email" name="txtEmail" id="txtEmail" class="form-control" placeholder="Correo">
+                        </div>
+                        <label id="completar2" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado<label style="color:red;">*</label></label>
+                        <input type="text" name="txtEstado" id="txtEstado" class="form-control" placeholder="Estado">
+                        <label id="completar3" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Direccion<label style="color:red;">*</label></label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">
+                                    <img src="./icon/direccion.png" alt="">
+                                </span>
+                            </div>
+                            <input type="text" name="txtDireccion" id="txtDireccion" class="form-control" placeholder="Dirección">
+                        </div>
+                        <label id="completar4" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono<label style="color:red;">*</label></label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">
+                                    <img src="./icon/receptor-de-telefono.png" alt="">
+                                </span>
+                            </div>
+                            <input type="text" name="txtTelefono" id="txtTelefono" class="form-control" placeholder="Teléfono">
+                        </div>
+                        <label id="completar5" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Enlace Foto<label style="color:red;">*</label></label>
+                        <input type="text" name="txtEnlaceFoto" id="txtEnlaceFoto" class="form-control" placeholder="Foto">
+                        <label id="completar6" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Codigo de empleado<label style="color:red;">*</label></label>
+                        <input type="text" name="txtCodigoEmpleado" id="txtCodigoEmpleado" maxlength="10" class="form-control" placeholder="Código de empleado">
+                        <label id="completar7" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Area<label style="color:red;">*</label></label>
+                        <input type="text" name="txtArea" id="txtArea" class="form-control" placeholder="Area Asignada">
+                        <label id="completar8" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Cargo<label style="color:red;">*</label></label>
+                        <input type="text" name="txtCargo" id="txtCargo" class="form-control" placeholder="Cargo">
+                        <label id="completar9" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Id area empleado<label style="color:red;">*</label></label>
+                        <input type="text" name="txtIdArea" id="txtIdArea" class="form-control" placeholder="Código de area de empleado">
+                        <label id="completar10" style="color:red;">Complete este campo</label>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-danger" id="button-form">Enviar Formulario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Formulario</title>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <script src="js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="row-2">
+            <div class="col-5">
+                <form>
+                    <div class="form-group">
+                        <label>Código de Empleado</label>
+                        <input type="text" name="codigo" id="cod" maxlength="10" class="form-control" placeholder="código de empleado">
+                    </div>
+                    <div class="form-group">
+                        <label>Identificación</label>
+                        <input type="text" name="identificacion" id="identificacion" maxlength="12" class="form-control" placeholder="identificación">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Identificación</label>
+                        <input type="text" id="tipo" class="form-control" placeholder="tipo de identificación">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="name" class="form-control" placeholder="nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido</label>
+                        <input type="text" name="lastName" id="lastName" class="form-control" placeholder="apellido completo">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">
+                                    <img src="./icon/receptor-de-telefono.png" alt="">
+                                </span>
+                            </div>
+                            <input type="text" name="txtTelefono" id="txtTelefono" class="form-control" placeholder="Teléfono">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Correo</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">
+                                    <img src="./icon/sobre.png" alt="">
+                                </span>
+                            </div>
+                            <input type="email" name="txtEmail" id="txtCorreo" class="form-control" placeholder="Correo">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="basic-url">Usuario</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">@</span>
+                            </div>
+                            <input type="text" id="user" class="form-control" placeholder="@usuario">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Clave</label>
+                        <input type="text" id="pass" class="form-control" placeholder="clave de acceso">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Rol</label>
+                        <input type="text" id="tiporol" class="form-control" placeholder="tipo de rol">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre de Area</label>
+                        <input type="text" id="nombrearea" class="form-control" placeholder="nombre de area">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Cargo</label>
+                        <input type="text" id="cargo" class="form-control" placeholder="cargo">
+                    </div>
+                    <div class="form-group">
+                        <label>Sexo</label>
+                        <select name="sexo" id="sexo">
+                            <option value="ninguno">Ninguno</option>
+                            <option value="mujer">Mujer</option>
+                            <option value="hombre">Hombre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-danger">Enviar Formulario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

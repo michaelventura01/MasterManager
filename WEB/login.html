@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Iniciar Sesión</title>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/solid.css"><!--Iconos-->
+        <link rel="stylesheet" href="css/style.css">
+        <script src="js/SweetAlert.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/jquery-3.4.0.min.js"></script>
+        <script src="./js/scriptLogin.js"></script>
+        <script src="js/qrcode.js"></script>
+        <script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>
+        <script src="js/all.js"></script><!--Iconos-->
+    </head>
+    <body>
+        <div class="modal-dialog text-center">
+            <div class="col-sm-8 main-section">
+                <div class="modal-content">
+                    <div class="col-12 user-img">
+                        <img src="img/mm.jpeg" alt="">
+                    </div>
+                    <form class="col-12">
+                        <div class="form-group" id="user-group">
+                            <input class="form-control" type="text" placeholder="Usuario">
+                        </div>
+                        <div class="form-group" id="pass-group">
+                            <input class="form-control" type="password" placeholder="Contraseña">
+                        </div>
+                        <button type="submit" class="btn btn-primary" onclick="onActionClick()"><i class="fas fa-sign-in-alt"></i> Acceder</button>
+                    </form>
+                    <div class="form-group">
+                        <div class="col-12">
+                            <a href="#" onclick="showQR();return false;">Acceder Mediante QR</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
