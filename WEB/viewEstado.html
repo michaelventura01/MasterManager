@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vista Estados</title>
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> <!--Version 3.4.0-->
+</head>
+<body>
+    <div class = "container-fluid">
+	<!-- Cabecera -->
+		<div class = "row p-3 bg-dark text-white">
+			<div class = "col-4">
+				PYRES
+			</div>
+			<div class = "col-3">
+				Mis negocios
+			</div>
+			<div class = "col-3">
+				Menu
+			</div>
+			<div class = "col-1">
+				<button type="button" class="btn btn-light">Desconectarse</button>
+			</div>
+		</div>
+		<div class = "row">
+			<div class = "col-12">
+				<div class="p-3 mb-2 bg-light text-dark text-center" style= "font-size:1.8em;">Estados</div>
+			</div>
+		</div>
+		<div class = "row">
+			<div class = "col-2">
+				<button type="button" class="btn btn-primary"> + Nuevo Estado</button>
+			</div>
+			<div class = "col-8">
+				<input type="text" class="form-control" id="txtBuscar" name="txtBuscar" placeholder="BUSCAR ESTADO">
+			</div>
+			<div class = "col-2">
+				<div class="btn-toolbar" role="toolbar">
+				  <button type="button" class="btn btn-default btn-lg">
+					<span class="glyphicon glyphicon-search"></span>
+				  </button>
+
+				  <button type="button" class="btn btn-default">
+					<span class="glyphicon glyphicon-trash"></span>
+				  </button>
+				</div>
+			</div>
+		</div>
+		<div class = "row">
+			<div class = "col-12">
+				<table class="table" name="tblEstado" id="tblEstado">
+				  <thead>
+					<tr>
+					  <th scope="col">NOMBRE ESTADO</th>
+					  <th scope="col">ESTADO</th>
+					</tr>
+				  </thead>
+				  <tbody>
+					<!--...-->
+				  </tbody>
+				</table>
+			</div>
+		</div>
+		<div class = "row p-3 bg-dark text-white card-footer">
+			<div class="card-body">
+				<blockquote class="blockquote mb-0">
+				  <p>PYRES. Todos los derechos reservados.</p>
+				  <footer class="blockquote-footer">NEGOCIOSRDOM</footer>
+				</blockquote>
+			</div>
+		</div>
+	</body>		
+</html>

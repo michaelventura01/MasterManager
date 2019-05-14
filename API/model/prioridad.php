@@ -1,18 +1,26 @@
 <?php
     require_once("conexion.php");
     require_once("estado.php");
-
+ 
     class Prioridad extends Conexion{
         
         private $id;
         private $descripcion;
+        private $prioridades;
+        
+        //relacion
         private $estados;
         
         function __construct(){
 			parent::__construct();
 
 			$this->id = 0;
-            $this->descripcion = 'vacio';
+            $this->descripcion = '';
+            $this->prioridades = '';
+        }
+
+        public function getPrioridades(){
+            return $this->prioridades;
         }
 
         public function getId(){
@@ -31,65 +39,45 @@
             $this->descripcion = $descripcion;
         }
 
-        public function agregarPrioridad($descripcion, $estado){
-            $this->estados = new Estados();
+        public function agregarPrioridad($estado){
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
             $this->conectar();
-            $this->query = "CALL agregarPrioridad($descripcion, $estado->getDescripcion());";
+            $this->query = "CALL agregarPrioridad('$this->descripcion', '$estado->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "el prioridad ha sido agregada";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
 
-        public function editarPrioridad($descripcion, $id, $estado){
-            $this->estados = new Estados();
+        public function editarPrioridad($estado){
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
             $this->conectar();
-            $this->query = "CALL editarPrioridad($descripcion, $id, $estado->getDescripcion());";
+            $this->query = "CALL editarPrioridad('$this->descripcion', '$this->id', '$estado->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "el prioridad ha sido editada";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
 
-        public function desactivarPrioridad($id, $estado){
-            $this->estados = new Estados();
+        public function desactivarPrioridad($estado){
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
             $this->conectar();
-            $this->query = "CALL desactivarPrioridad($id, $estado->getDescripcion());";
+            $this->query = "CALL desactivarPrioridad('$this->id', '$estado->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "el prioridad ha sido editada";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
 
         public function verPrioridades(){
             $this->conectar();
-
 			$this->query = "SELECT 
                                 idPrioridad as 'id', 
                                 descripcionPrioridad as 'descripcion' 
                             FROM PRIORIDADES";
 
 			$resultSet = mysqli_query($this->conexion, $this->query);
-
-            $this->estados = array();
+            $this->prioridades = array();
 
 			while($fila = mysqli_fetch_array($resultSet)){
 				$arreglo = array(
@@ -97,43 +85,35 @@
 					'descripcion' => $fila['descripcion']
 				);
 
-				array_push($this->estados, $arreglo);
+				array_push($this->prioridades, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
 			$this->desconectar();
         }
 
         public function verPrioridadActivas($estado){
-            $this->estados = new Estados();
-            
+            $this->estados = new Estado();            
             $estados->setDescripcion($estado);
 
             $this->conectar();
-
 			$this->query = "SELECT 
-                                idSexo as 'id', 
-                                descripcionSexo as 'descripcion' 
-                            FROM SEXOS
-                            WHERE idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = $estado->getDescripcion())";
+                                idPrioridad as 'id', 
+                                descripcionPrioridad as 'descripcion' 
+                            FROM PRIORIDADES
+                            WHERE idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = '$estado->getDescripcion()')";
 
 			$resultSet = mysqli_query($this->conexion, $this->query);
-
-            $this->estados = array();
-
-			while($fila = mysqli_fetch_array($resultSet)){
+            
+            $this->prioridades = array();
+            
+            while($fila = mysqli_fetch_array($resultSet)){
 				$arreglo = array(
 					'id' => $fila['id'],
 					'descripcion' => $fila['descripcion']
 				);
 
-				array_push($this->estados, $arreglo);
+				array_push($this->prioridades, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
-			$this->desconectar();
+            $this->desconectar();
         }
 
         

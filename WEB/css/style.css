@@ -1,59 +1,37 @@
 body{
-    background: url("../img/aula-magna.jpeg") no-repeat center center fixed;
-    background-size: cover;
+        padding-top: 70px;
+
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(top,  #ffffff 0%, #e5e5e5 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#e5e5e5)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #ffffff 0%,#e5e5e5 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
 }
 
-.modal-content{
-    background-color: #2863ea;
-    opacity: .85;
-    padding: 0 20px;
-    box-shadow: 0px 0px 9px black;
+.logos_GnuLinux{
+	display: block;
+	margin: 0 auto;
 }
 
-.user-img{
-    margin-top: -50px;
-    margin-bottom: 35px;
+footer{
+	background-color: black;
 }
 
-.user-img img{
-    width: 100px;
-    height: 100px;
-    box-shadow: 0px 0px 9px;
-    border-radius: 50%;
+.no-padding {
+	padding: 0;
 }
 
-.main-section{
-    margin: 0 auto;
-    margin-top: 25%;
-    padding: 0;
+.item img{
+	width: 80%;
+	margin-left: 10%;
+	opacity: 0.7;
+	margin-top: -75px;
 }
 
-.form-group input{
-    height: 42px;
-    font-size: 18px;
-    border: 0;
-    padding-left: 30px;
-    border-radius: 5px;
-}
-
-.form-group{
-    position: relative;
-}
-
-#user-group input{
-    background: url("../img/usuario.png");
-    background-repeat: no-repeat;
-    background-position-y: 40%;
-    background-color: white;
-}
-
-#pass-group input{
-    background: url("../img/candado-abierto.png");
-    background-repeat: no-repeat;
-    background-color: white;
-    background-position-y: 40%;
-}
-
-a{
-    color: white;
+#carousel-example-generic{
+	overflow: hidden;
+	height: 400px;
 }

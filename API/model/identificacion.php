@@ -4,16 +4,21 @@
    
     class Identificacion extends Conexion{
 
-        private $id; //entero
-        private $descripcion; //text
+        private $id; 
+        private $descripcion; 
+
+        private $identificaciones;
         
-        private $estados; //relacion
+
+        //relacion
+        private $estados; 
 
         function __construct(){
 			parent::__construct();
 
 			$this->id = 0;
-            $this->descripcion = 'vacio';
+            $this->descripcion = '';
+
         }
 
         public function setId($id){
@@ -32,52 +37,38 @@
             return $this->descripcion;
         }
 
-        public function agregarIdentificacion($descripcion, $estado){
-            $this->estados = new Estados();
-            $estados->setDescripcion($estado);
-
-            $this->conectar();
-            $this->query = "call agregarIdentificacion($descripcion, $estados->getDescripcion());";
-			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-
-            $this->respuesta = 2;	
-            $this->mensaje = "la identificacion ha sido agregada";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+        public function getIdentificaciones(){
+            return $this->identificaciones;
         }
 
-        public function editarIdentificacion($id, $descripcion, $estado){
-            $this->estados = new Estados();
+        public function agregarIdentificacion($estado){
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
             $this->conectar();
-            $this->query = "call editarIdentificacion($descripcion, $id, $estados->getDescripcion());";
+            $this->query = "call agregarIdentificacion('$this->descripcion', '$estados->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "la identificacion ha sido modificada";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
 
-        public function desactivarIdentificacion($id, $estado){
-            $this->estados = new Estados();
+        public function editarIdentificacion($estado){
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
             $this->conectar();
-            $this->query = "call desactivarIdentificacion($id, $estados->getDescripcion());";
+            $this->query = "call editarIdentificacion('$this->descripcion', '$this->id', '$estados->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "la identificacion ha sido modificada";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
+        }
+
+        public function desactivarIdentificacion($estado){
+            $this->estados = new Estado();
+            $estados->setDescripcion($estado);
+
+            $this->conectar();
+            $this->query = "call desactivarIdentificacion('$this->id', '$estados->getDescripcion()');";
+			$this->conexion->query($this->query);
+			$this->desconectar();
         }
         
         public function verIdentificaciones(){
@@ -90,7 +81,7 @@
 
 			$resultSet = mysqli_query($this->conexion, $this->query);
 
-            $this->estados = array();
+            $this->prioridades = array();
 
 			while($fila = mysqli_fetch_array($resultSet)){
 				$arreglo = array(
@@ -98,16 +89,13 @@
 					'descripcion' => $fila['descripcion']
 				);
 
-				array_push($this->estados, $arreglo);
+				array_push($this->prioridades, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
 			$this->desconectar();
         }
 
         public function verIdentificacionActivos($estado){
-            $this->estados = new Estados();
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
 
@@ -117,24 +105,22 @@
                                 idIdentificacion as 'id', 
                                 descripcionIdentificacion as 'descripcion' 
                             FROM IDENTIFICACIONES
-                            WHERE idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = $estado->getDescripcion())";
+                            WHERE idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = '$estado->getDescripcion()')";
 
 			$resultSet = mysqli_query($this->conexion, $this->query);
 
-            $this->estados = array();
+            $this->prioridades = array();
 
 			while($fila = mysqli_fetch_array($resultSet)){
 				$arreglo = array(
 					'id' => $fila['id'],
 					'descripcion' => $fila['descripcion']
 				);
-
-				array_push($this->estados, $arreglo);
-			}
-
-			$this->respuesta = 2;
-
-			$this->desconectar();
+				array_push($this->prioridades, $arreglo);
+            }
+            
+            $this->desconectar();
         }
     }
+
 ?>

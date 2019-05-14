@@ -11,7 +11,16 @@ CREATE TABLE EMPLEADOS(
 	telefonoEmpleado VARCHAR(10),
 	correoEmpleado TEXT,
 	idEstado INT NOT NULL,
-	idSexo int not null
+	idSexo int not null,
+	fechaNacimiento date not null,
+	fechaEntrada date not null
+);
+
+CREATE TABLE SALIDAEMPLEADO(
+	idSalidaEmpleado int primary key,
+	codigoEmpleado varchar(10),
+	fechaSalida date not null,
+	idEstado int not null 
 );
 
 CREATE TABLE PRIORIDADES(
@@ -33,13 +42,23 @@ CREATE TABLE SEXOS(
 	idEstado int not null
 );
 
+
 CREATE TABLE FACULTADES(
 	idFacultad VARCHAR(10) PRIMARY KEY,
 	nombreFacultad TEXT NOT NULL,
 	direccionFacultad text not null,
 	telefonoFacultad text not null,
 	correoFacultad text not null,
-	idEstado INT NOT NULL
+	idEstado INT NOT NULL,
+	fechaInicio date not null
+);
+
+
+CREATE TABLE FINFACULTAD(
+	idFinFacultad int primary key,
+	idFacultad varchar(10),
+	fechaFin date not null,
+	idEstado int not null 
 );
 
 CREATE TABLE FOTOFACULTADES(
@@ -49,11 +68,21 @@ CREATE TABLE FOTOFACULTADES(
 	idEstado int not null
 );
 
+
 CREATE TABLE AREAS(
 	idArea VARCHAR(10) PRIMARY KEY,
 	nombreArea TEXT NOT NULL,
 	idFacultad VARCHAR(10) NOT NULL,
-	idEstado INT NOT NULL
+	idEstado INT NOT NULL,
+	fechaInicio date not null
+);
+
+
+CREATE TABLE FINAREA(
+	idFinArea int primary key,
+	idArea varchar(10),
+	fechaFin date not null,
+	idEstado int not null 
 );
 
 CREATE TABLE AREAEMPLEADOS(
@@ -118,7 +147,6 @@ CREATE TABLE ESTADOS(
 	estado BIT NOT NULL
 );
 
-
 CREATE TABLE DOCUMENTOS(
 	idDocumento VARCHAR(10) PRIMARY KEY,
 	idTipoDocumento INT NOT NULL, 
@@ -159,6 +187,42 @@ CREATE TABLE ENLACESROLES(
 );
 
 -- CONSTRAINTS
+
+ALTER TABLE SALIDAEMPLEADO
+ADD FOREIGN KEY(codigoEmpleado) 
+REFERENCES EMPLEADOS(codigoEmpleado)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE SALIDAEMPLEADO
+ADD FOREIGN KEY (idEstado)
+REFERENCES ESTADOS(idEstado) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE FINFACULTAD
+ADD FOREIGN KEY(idFacultad)
+REFERENCES FACULTADES(idFacultad)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE FINFACULTAD
+ADD FOREIGN KEY (idEstado)
+REFERENCES ESTADOS(idEstado) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE FINAREA
+ADD FOREIGN KEY(idArea)
+REFERENCES AREAS(idArea)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE FINAREA
+ADD FOREIGN KEY (idEstado)
+REFERENCES ESTADOS(idEstado) 
+ON DELETE CASCADE
+ON UPDATE CASCADE;
 
 ALTER TABLE TIEMPODOCUMENTOS
 ADD FOREIGN KEY(idDocumento)
@@ -207,7 +271,6 @@ ADD FOREIGN KEY (idIdentificacion)
 REFERENCES IDENTIFICACIONES(idIdentificacion)
 ON DELETE CASCADE
 ON UPDATE CASCADE;
-
 
 ALTER TABLE TIEMPOEVENTOS
 ADD FOREIGN KEY(idEvento)
@@ -434,95 +497,120 @@ BEGIN
 	WHERE idSexo = id;
 END;
 
-CREATE DEFINER=`id8696707_root`@`%` PROCEDURE `agregarFacultad`(IN `nombre` TEXT, IN `id` VARCHAR(10), IN `correo` TEXT, IN `direccion` TEXT, IN `telefono` TEXT, IN `enlace` TEXT, IN `estado` TEXT) 
+CREATE DEFINER=`id8696707_root`@`%` PROCEDURE `agregarFacultad`(IN `nombre` TEXT, IN `id` VARCHAR(10), IN `correo` TEXT, IN `direccion` TEXT, IN `telefono` TEXT, IN `enlace` TEXT, IN `estado` TEXT, in fecha date) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN 
-	INSERT INTO FACULTADES(idFacultad, nombreFacultad, direccionFacultad, telefonoFacultad, correoFacultad, idEstado) 
-	VALUES(id, nombre, direccion, telefono, correo, (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)); 
+	INSERT INTO FACULTADES(idFacultad, nombreFacultad, direccionFacultad, telefonoFacultad, correoFacultad, idEstado, fechaInicio) 
+	VALUES(id, nombre, direccion, telefono, correo, (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), fecha); 
 	call agregarFotoFacultad(enlace, nombre, estado); 
-END
-
-CREATE PROCEDURE `editarFacultad`(IN `nombre` TEXT, in idfacultad varchar(10),  in correo text, in direccion text, in telefono text, in enlace text, IN `id` varchar(10), IN `estado` TEXT) 
-NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
-BEGIN
-	DECLARE idestado int;
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	UPDATE FACULTADES
-	SET nombreFacultad = nombre , idEstado = idestado, direccionFacultad = direccion, correoFacultad = correo, telefonoFacultad = telefono, idFacultad = idfacultad
-	WHERE idFacultad = id;
-
-	call `editarFotoFacultad`(`enlace`, `estado`, nombre, id) ;
 END;
 
-CREATE PROCEDURE `desactivarFacultad`(IN `id` varchar(10), IN `estado` TEXT) 
+CREATE PROCEDURE `editarFacultad`(IN `nombre` TEXT, in idfacultad varchar(10),  in correo text, in direccion text, in telefono text, in enlace text, IN `id` varchar(10), IN `estado` TEXT, in idFoto int, in fecha date, in estadoin text) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-	DECLARE idfoto int;
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	SELECT idFotoFacultad into idfoto
-	FROM FOTOFACULTADES
-	WHERE idFacultad = id and idEstado = idestado;
-
 	UPDATE FACULTADES
-	SET idEstado = idestado 
+	SET 
+		nombreFacultad = nombre, 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), 
+		direccionFacultad = direccion, 
+		correoFacultad = correo, 
+		telefonoFacultad = telefono, 
+		idFacultad = idfacultad,
+		fechaInicio = fecha
 	WHERE idFacultad = id;
 
-	call desactivarFotoFacultad(idfoto, `estado`);
+	call `editarFotoFacultad`(`enlace`, `estado`, nombre, idFoto) ;
+
+	UPDATE FINFACULTAD
+	SET	
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estadoin)
+	WHERE idFacultad = id;
+END;
+
+CREATE PROCEDURE `desactivarFacultad`(IN `id` varchar(10), IN `estado` TEXT, in fechafin date) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+BEGIN
+
+	UPDATE FACULTADES
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado) 
+	WHERE idFacultad = id;
+
+	call desactivarFotoFacultad(
+		(SELECT idFotoFacultad FROM FOTOFACULTADES WHERE idFacultad = id and idEstado = idestado), 
+		`estado`
+	);
+
+	UPDATE FINFACULTAD 
+	SET	idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
+	WHERE idFacultad = id;
+
+	INSERT INTO FINFACULTAD(
+		idFacultad,
+		fechaFin,
+		idEstado
+	)VALUES(
+		idarea,
+		fechaFin,
+		(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
+	);
+
 END;
 
 
-CREATE DEFINER=`id8696707_root`@`%` PROCEDURE `agregarArea`(IN `nombre` TEXT, IN `id` VARCHAR(10), IN `facultad` TEXT, IN `estado` TEXT) 
+CREATE DEFINER=`id8696707_root`@`%` PROCEDURE `agregarArea`(IN `nombre` TEXT, IN `id` VARCHAR(10), IN `facultad` TEXT, IN `estado` TEXT, in fecha date) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN 
-	INSERT INTO AREAS(idArea, nombreArea, idFacultad, idEstado) 
+	INSERT INTO AREAS(
+		idArea, 
+		nombreArea, 
+		idFacultad, 
+		idEstado,
+		fechaInicio) 
 	VALUES(
 			id, 
 			nombre, 
-			(	SELECT idFacultad 
-				FROM FACULTADES 
-				WHERE nombreFacultad = facultad), 
-			(	SELECT idEstado 
-				FROM ESTADOS 
-				WHERE descripcionEstado = estado)
+			(SELECT idFacultad FROM FACULTADES WHERE nombreFacultad = facultad), 
+			(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado),
+			fecha
 		); 
+END;
+
+CREATE DEFINER=`id8696707_root`@`%` PROCEDURE `editarArea`(IN `idarea` VARCHAR(10), IN `nombre` TEXT, IN `idfacultad` TEXT, IN `estado` TEXT, IN `id` VARCHAR(10), IN `estadoin` TEXT) 
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+BEGIN 
+	UPDATE FINAREA 
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estadoin) 
+	WHERE idArea = id; 
+	UPDATE AREAS 
+	SET idArea = idarea, 
+	nombreArea = nombre, 
+	idFacultad = idFacultad, 
+	idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado) 
+	WHERE idArea = id; 
 END
 
-CREATE PROCEDURE editarArea(IN `nombre` TEXT, IN `id` varchar(10), IN `idFacultad` varchar(10), IN `estado` text, IN `idarea` varchar(10))
+CREATE PROCEDURE `desactivarArea`(IN `estado` TEXT, IN `idarea` VARCHAR(10), IN `fechaFin` DATE, IN `estadoinverso` TEXT) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
-BEGIN
-	DECLARE idestado int;
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	UPDATE AREAS
-	SET idArea = id, nombreArea = nombre, idFacultad = idFacultad, idEstado = idestado
-	WHERE idArea = idarea;
-END;
-
-
-CREATE PROCEDURE desactivarArea(IN `estado` text, IN `idarea` varchar(10))
-NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
-BEGIN
-
-	DECLARE idestado int;
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	UPDATE AREAS
-	SET idEstado = estado
-	WHERE idArea = idarea;
-END;
+BEGIN 
+	UPDATE AREAS 
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado) 
+	WHERE idArea = idarea; 
+	
+	UPDATE FINAREA 
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado) 
+	WHERE 
+		idArea = idarea; 
+	
+	INSERT INTO FINAREA( 
+		idArea, 
+		fechaFin, 
+		idEstado )
+	VALUES( 
+		idarea, 
+		fechaFin, 
+		(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estadoinverso) 
+	); 
+END
 
 CREATE PROCEDURE agregarPrioridad(IN nombre TEXT, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
@@ -592,13 +680,20 @@ END;
 
 CREATE PROCEDURE agregarRoles(IN nombre TEXT, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
-INSERT INTO ROLES(descripcionRol, idEstado)
-VALUES(nombre, (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado));
+INSERT INTO ROLES(
+	descripcionRol, 
+	idEstado)
+VALUES(
+	nombre, 
+	(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
+);
 
 CREATE PROCEDURE editarRoles(IN nombre TEXT, IN id INT, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 UPDATE ROLES
-SET descripcionRol = nombre, idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
+SET 
+	descripcionRol = nombre, 
+	idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 WHERE idRol = id;
 
 CREATE PROCEDURE desactivarRoles(IN id INT, in estado text)
@@ -610,15 +705,22 @@ WHERE idRol = id;
 CREATE PROCEDURE agregarCargos(IN nombre TEXT, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	INSERT INTO CARGOS(descripcionCargo, idEstado)
-	VALUES(nombre, (SELECT idEstado	from ESTADOS WHERE descripcionEstado = estado));
+	INSERT INTO CARGOS(
+		descripcionCargo, 
+		idEstado)
+	VALUES(
+		nombre, 
+		(SELECT idEstado	from ESTADOS WHERE descripcionEstado = estado)
+		);
 END;
 
 CREATE PROCEDURE editarCargos(IN nombre TEXT, IN id INT, in estado TEXT)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
 	UPDATE CARGOS
-	SET descripcionCargo = nombre, idEstado = (SELECT idEstado	from ESTADOS WHERE descripcionEstado = estado)
+	SET 
+		descripcionCargo = nombre, 
+		idEstado = (SELECT idEstado	from ESTADOS WHERE descripcionEstado = estado)
 	WHERE idCargo = id;
 END;
 
@@ -633,90 +735,106 @@ END;
 CREATE PROCEDURE agregarTipoPrioridad(IN nombre TEXT, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-
-	SELECT idEstado into idestado
-	from ESTADOS
-	WHERE descripcionEstado = estado;
-
-	INSERT INTO PRIORIDADES(descripcionPrioridad, idEstado)
-	VALUES(nombre, idestado);
+	INSERT INTO PRIORIDADES(
+		descripcionPrioridad, 
+		idEstado)
+	VALUES(
+		nombre, 
+		(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado));
 END;
 
 CREATE PROCEDURE editarTipoPrioridad(IN nombre TEXT, IN id INT, in estado TEXT)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
 	UPDATE CARGOS
-	SET descripcionPrioridad = nombre, idEstado = idestado
+	SET 
+		descripcionPrioridad = nombre, 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 	WHERE idPrioridad = id;
 END;
 
 CREATE PROCEDURE desactivarTipoPrioridad(IN id INT, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
 	UPDATE PRIORIDADES
-	SET idEstado = idestado
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 	WHERE idPrioridad = id;
 END;
 
-CREATE PROCEDURE agregarEmpleado(IN codigo varchar(10), IN identificacion varchar(12), in nombre text, in apellido text, in tipoidentificacion text, in telefono varchar(10), in correo text, in sexo text,in enlace text, in estado text)
+CREATE PROCEDURE agregarEmpleado(IN codigo varchar(10), IN identificacion varchar(12), in nombre text, in apellido text, in tipoidentificacion text, in telefono varchar(10), in correo text, in sexo text,in enlace text, in estado text, in fechaNacimiento date, in fechaEntrada date)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
-BEGIN
 	BEGIN
-	INSERT INTO EMPLEADOS(codigoEmpleado, identificacionEmpleado, nombreEmpleado, apellidoEmpleado, idIdentificacion, telefonoEmpleado, correoEmpleado, idEstado, idSexo)
-	VALUES(codigo, identificacion, nombre, apellido, (SELECT idIdentificacion FROM IDENTIFICACIONES WHERE descripcionIdentificacion = tipoidentificacion), telefono, correo, (SELECT idEstado	from ESTADOS WHERE descripcionEstado = estado), (SELECT idSexo FROM SEXOS WHERE descripcionSexo = sexo));
-
+	INSERT INTO EMPLEADOS(
+		codigoEmpleado, 
+		identificacionEmpleado, 
+		nombreEmpleado, 
+		apellidoEmpleado, 
+		idIdentificacion, 
+		telefonoEmpleado, 
+		correoEmpleado, 
+		idEstado, 
+		idSexo, 
+		fechaNacimiento,
+		fechaEntrada)
+	VALUES(
+		codigo, 
+		identificacion, 
+		nombre, 
+		apellido, 
+		(SELECT idIdentificacion FROM IDENTIFICACIONES WHERE descripcionIdentificacion = tipoidentificacion), telefono, correo, 
+		(SELECT idEstado from ESTADOS WHERE descripcionEstado = estado), 
+		(SELECT idSexo FROM SEXOS WHERE descripcionSexo = sexo),
+		fechaNacimiento,
+		fechaEntrada);
 	call agregarFotoEmpleados(enlace, codigo, estado); 
-END
 END;
 
-CREATE PROCEDURE editarEmpleado(IN codigo varchar(10), IN identificacion varchar(12), in nombre text, in apellido text, in tipoidentificacion text, in telefono varchar(10), in correo text, in estado text, in codigoEmp varchar(10), in sexo text, in enlace text, in idfoto int)
+CREATE PROCEDURE editarEmpleado(IN codigo varchar(10), IN identificacion varchar(12), in nombre text, in apellido text, in tipoidentificacion text, in telefono varchar(10), in correo text, in estado text, in codigoEmp varchar(10), in sexo text, in enlace text, in idfoto int, in fechaNacimiento date, in fechaEntrada date, in estadoin text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
-BEGIN
-	DECLARE ididentificacion int;
-	DECLARE idsexo int;
-	DECLARE idestado int;
-	
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-	
-	SELECT idIdentificacion INTO ididentificacion
-	FROM IDENTIFICACIONES
-	WHERE descripcionIdentificacion = tipoidentificacion;
-	
-	SELECT idSexo INTO idsexo
-	FROM SEXOS
-	WHERE descripcionSexo = sexo;
-	
+BEGIN	
 	UPDATE EMPLEADOS
-	SET	codigoEmpleado = codigo, identificacionEmpleado = identificacion, ,nombreEmpleado = nombre, apellidoEmpleado = apellido, idIdentificacion = ididentificacion, telefonoEmpleado = telefono, correoEmpleado = correo, idEstado = idestado, idSexo = idsexo
+	SET	
+		codigoEmpleado = codigo, 
+		identificacionEmpleado = identificacion, 
+		nombreEmpleado = nombre, 
+		apellidoEmpleado = apellido, 
+		idIdentificacion = (SELECT idIdentificacion FROM IDENTIFICACIONES WHERE descripcionIdentificacion = tipoidentificacion), 
+		telefonoEmpleado = telefono, 
+		correoEmpleado = correo, 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), 
+		idSexo = (SELECT idSexo FROM SEXOS WHERE descripcionSexo = sexo),
+		fechaNacimiento = fechaNacimiento,
+		fechaEntrada = fechaEntrada
 	WHERE codigoEmpleado = codigoEmp;
 
 	call `editarFotoEmpleados`(enlace, estado, codigo, idfoto);
+
+	UPDATE SALIDAEMPLEADO
+	SET idEstado = estadoin
+	WHERE codigoEmpleado = codigo;
 END;
 
-CREATE PROCEDURE desactivarEmpleado(IN codigo varchar(10), IN estado text, in idfoto int)
+CREATE PROCEDURE desactivarEmpleado(IN codigo varchar(10), IN estado text, in idfoto int, in estadoin text, in fecha date)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-	
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-	
 	UPDATE EMPLEADOS
-	SET idEstado = idestado
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 	WHERE codigoEmpleado = codigo; 
+
+
+	UPDATE SALIDAEMPLEADO
+	SET idEstado = estado
+	WHERE codigoEmpleado = codigo;
+
+	INSERT INTO SALIDAEMPLEADO(
+		codigoEmpleado,
+		fechaSalida
+		idEstado
+	)VALUES(
+		codigo,
+		fecha,
+		(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estadoin)
+	);
 	
 	call `desactivarFotoEmpleados`(idfoto, `estado`);
 END;
@@ -724,167 +842,143 @@ END;
 CREATE DEFINER=`id8696707_root`@`%` PROCEDURE `agregarAreaEmpleado`(IN `area` TEXT, IN `empleado` VARCHAR(10), IN `cargo` TEXT, IN `estado` TEXT) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN 
-	INSERT INTO AREAEMPLEADOS(idArea, codigoEmpleado, idCargo, idEstado) 
-	VALUES ((SELECT idArea FROM AREAS WHERE nombreArea = area), 
-			empleado, 
-			(SELECT idCargo FROM CARGOS WHERE descripcionCargo = cargo), 
-			(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
-		); 
+	INSERT INTO AREAEMPLEADOS(
+		idArea, 
+		codigoEmpleado, 
+		idCargo, 
+		idEstado) 
+	VALUES (
+		(SELECT idArea FROM AREAS WHERE nombreArea = area), 
+		empleado, 
+		(SELECT idCargo FROM CARGOS WHERE descripcionCargo = cargo), 
+		(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
+	); 
 END
 
 CREATE PROCEDURE editarAreaEmpleado(IN area varchar(10), IN empleado varchar(10), in cargo text, in estado text ,in id INT)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idcargo int;
-	DECLARE idestado int;
-
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	SELECT idCargo INTO idcargo
-	FROM CARGOS
-	WHERE descripcionCargo = cargo;
-
 	UPDATE AREAEMPLEADOS
-	SET idArea = area, codigoEmpleado = empleado, idCargo = idcargo, idEstado = estado
+	SET 
+		idArea = area, 
+		codigoEmpleado = empleado, 
+		idCargo = (SELECT idCargo FROM CARGOS WHERE descripcionCargo = cargo), 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 	WHERE idAreaEmpleado = id;
 END;
 
 CREATE PROCEDURE desactivarAreaEmpleado( in estado text ,in id INT)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
 	UPDATE AREAEMPLEADOS
-	SET idEstado = estado
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 	WHERE idAreaEmpleado = id;
 END;
 
 CREATE DEFINER=`id8696707_root`@`%` PROCEDURE `agregarUsuario`(IN `user` TEXT, IN `pass` TEXT, IN `rol` TEXT, IN `empleado` VARCHAR(10), IN `estado` TEXT) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN 
-	INSERT INTO USUARIOS(descripcionUsuaruario, claveUsuario, idEstado, idRol, codigoEmpleado) 
+	INSERT INTO USUARIOS(descripcionUsuario, claveUsuario, idEstado, idRol, codigoEmpleado) 
 	VALUES(user, pass, (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), (SELECT idRol FROM ROLES WHERE descripcionRol = rol), empleado); 
 END;
 
 CREATE PROCEDURE editarUsuario(IN id INT, IN user TEXT, IN pass TEXT, IN estado text, in rol text, in empleado varchar(10) )
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-	DECLARE idrol int;
-
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	SELECT idRol into idrol
-	FROM ROLES
-	WHERE descripcionRol = rol;
-
 	UPDATE USUARIOS
-	SET descripcionUsuaruario = user, claveUsuario = pass, idEstado = idestado, idRol = idrol, codigoEmpleado = empleado
+	SET 
+		descripcionUsuario = user, 
+		claveUsuario = pass, 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), 
+		idRol = (SELECT idRol FROM ROLES WHERE descripcionRol = rol), 
+		codigoEmpleado = empleado
 	WHERE idUsuario = id;
 END;
 
 CREATE PROCEDURE desactivarUsuario(in id int, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-	
-	SELECT idEstado INTO idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-	
 	UPDATE USUARIOS
-	SET idEstado = idestado
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 	WHERE idUsuario = id;
 END;
 
 
-CREATE PROCEDURE empleadoUsuarioAgregar(IN codigo varchar(10), IN identificacion varchar(12),in tipoidentificacion TEXT, in nombre text, in apellido text,  in telefono varchar(10), in correo text, IN user TEXT, IN pass TEXT, in tiporol text, IN nombrearea text, in tipocargo text, in sexo text, in enlace text, in estado text)
+CREATE PROCEDURE empleadoUsuarioAgregar(IN codigo varchar(10), IN identificacion varchar(12),in tipoidentificacion TEXT, in nombre text, in apellido text,  in telefono varchar(10), in correo text, IN user TEXT, IN pass TEXT, in tiporol text, IN nombrearea text, in tipocargo text, in sexo text, in enlace text, in estado text, in fechaNacimiento date, in fechaEntrada date)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	call agregarEmpleado(codigo, identificacion, nombre, apellido, tipoidentificacion, telefono, correo, sexo, enlace, estado);
-	
+	call agregarEmpleado(codigo, identificacion, nombre, apellido, tipoidentificacion, telefono, correo, sexo, enlace, estado, fechaNacimiento, fechaNacimiento, fechaEntrada);
 	call agregarAreaEmpleado(nombrearea, codigo, tipocargo, estado);
-	
-	call agregarUsuario(user,pass ,tiporol, codigo, estado);
+	call agregarUsuario(user,pass ,tiporol, codigo, estado); 
 END;
 
-CREATE DEFINER = `root`@`localhost` PROCEDURE `empleadoUsuarioDesactivar`(IN `codigoempleado` VARCHAR(10), IN `usuario` text, IN `estado` text) 
+CREATE PROCEDURE empleadoUsuarioEditar(IN codigo varchar(10), IN identificacion varchar(12),in tipoidentificacion TEXT, in nombre text, in apellido text,  in telefono varchar(10), in correo text, IN user TEXT, IN pass TEXT, in tiporol text, IN nombrearea text, in tipocargo text, in sexo text, in enlace text, in estado text, in codigoEmp varchar(10), in idfoto int, in idarea varchar(10), in idareaempleado int, in idusuario int, in fechaNacimiento date, in fechaEntrada date, in estadoin text)
+NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
+BEGIN
+	call editarEmpleado(codigo, identificacion, nombre, apellido, tipoidentificacion, telefono, correo,estado, codigoEmp, sexo, enlace, idfoto, fechaNacimiento, fechaEntrada, estadoin);
+	call editarAreaEmpleado(idarea, codigo, tipocargo, estado, idareaempleado);
+	call editarUsuario(idusuario, user, pass, estado, tiporol, codigo);
+END;
+
+CREATE DEFINER=`id8696707_root`@`%` PROCEDURE `empleadoUsuarioDesactivar`(IN `codigoempleado` VARCHAR(10), IN `idusuario` TEXT, IN `estado` TEXT, IN `idfoto` INT, IN `estadoin` TEXT, IN `fecha` DATE) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN 
-	DECLARE idusuario int;
-
-	SELECT idUsuario INTO idusuario
-	FROM USUARIOS
-	WHERE descripcionUsuario = usuario;
-
-	call desactivarEmpleado(codigoempleado, estado); 
+	call desactivarEmpleado(codigoempleado, estado, idfoto, estadoin, fecha); 
 	call desactivarUsuario(idusuario, estado); 
-END;
+END
 
 CREATE PROCEDURE agregarEvento(in evento varchar(10), in empleado varchar(10), in documento varchar(10), in descripcion text, in area text, IN hora time, in fecha date, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
 BEGIN
-	DECLARE idarea varchar(10);
-	DECLARE idestado int;
 	
-	SELECT idArea INTO idarea
-	FROM AREAS
-	WHERE nombreArea = area; 
-
-	SELECT idEstado INTO idestado
-	FROM ESTADOS 
-	WHERE descripcionEstado = estado;
-
-	INSERT INTO EVENTOS(idEvento, idDocumento, idEstado, descripcionEvento, idArea, horaEvento, fechaEvento, codigoEmpleado)
-	VALUES(evento, documento, idestado, descripcion, idarea, hora, fecha, empleado);
+	INSERT INTO EVENTOS(
+		idEvento, 
+		idDocumento, 
+		idEstado, 
+		descripcionEvento, 
+		idArea, 
+		horaEvento, 
+		fechaEvento, 
+		codigoEmpleado)
+	VALUES(
+		evento, 
+		documento, 
+		(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), 
+		descripcion, 
+		(SELECT idArea FROM AREAS WHERE nombreArea = area), 
+		hora, 
+		fecha, 
+		empleado
+	);
 END;
 
 CREATE PROCEDURE editarEvento(in evento varchar(10), in documento varchar(10), in empleado varchar(10),in estado text, in descripcion text, in area text, in idevento varchar(10), IN hora time, in fecha date)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
 BEGIN
-	DECLARE idestado int;
-	DECLARE idarea varchar(10);
-
-	SELECT idArea INTO idarea
-	FROM AREAS
-	WHERE nombreArea = area; 
-
-	SELECT idEstado INTO idestado
-	FROM ESTADOS 
-	WHERE descripcionEstado = estado;
-
 	UPDATE EVENTOS
-	SET idEvento = evento, idDocumento = documento, idEstado = idestado, codigoEmpleado = empleado, descripcionEvento = descripcion, idArea = idarea, horaEvento = hora, fechaEvento = fecha
+	SET 
+		idEvento = evento, 
+		idDocumento = documento, 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), 
+		codigoEmpleado = empleado, 
+		descripcionEvento = descripcion, 
+		idArea = (SELECT idArea FROM AREAS WHERE nombreArea = areaVia), 
+		horaEvento = hora, 
+		fechaEvento = fecha
 	WHERE idEvento = idevento;
 END;
 
 CREATE PROCEDURE desactivarEvento(in evento varchar(10), in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
 BEGIN
-	DECLARE idestado int;
-
-	SELECT idEstado INTO idestado
-	FROM ESTADOS 
-	WHERE descripcionEstado = estado;
-
 	UPDATE EVENTOS
-	SET idEstado = idestado
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 	WHERE idEvento = evento;
 END;
 
 CREATE PROCEDURE agregarEnlace(IN nombre text, in enlace text, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER
 BEGIN
-	;
-	
 	INSERT INTO ENLACES(nombreEnlace, urlEnlace, idEstado)
 	VALUES(nombre, enlace, (SELECT idEstado	FROM ESTADOS WHERE descripcionEstado = estado));
 END;
@@ -923,71 +1017,55 @@ END;
 CREATE PROCEDURE agregarDocumento(in iddocumento varchar(10), in tipodocumento text, in fecha date, in hora time, in area text, in desrec text,  in areavia text, in empleado varchar(10), tipoprioridad text, in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idtipodocumento int;
-	DECLARE idarea varchar(10);
-	DECLARE idareavia varchar(10);
-	DECLARE idestado int;
-	DECLARE idprioridad int;
-
-	SELECT idPrioridad into idprioridad
-	FROM PRIORIDADES
-	WHERE descripcionPrioridad = tipoprioridad;
-
-	SELECT idTipoDocumento into idtipodocumento
-	FROM TIPODOCUMENTOS
-	WHERE descripcionTipoDocumento = tipodocumento;
-
-	SELECT idArea into idarea
-	FROM AREAS 
-	WHERE nombreArea = area;
-
-	SELECT idArea into idareavia
-	FROM AREAS 
-	WHERE nombreArea = areaVia;
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	INSERT INTO DOCUMENTOS(idDocumento, idTipoDocumento, fechaDocumento, horaDocumento, idArea ,descripcionDocumento ,idEstado, areaVia, codigoEmpleado, idPrioridad)
-	VALUES(iddocumento, idtipodocumento, fecha, hora, idarea, desrec, idestado, idareavia, empleado, idprioridad);
+	INSERT INTO DOCUMENTOS(
+		idDocumento, 
+		idTipoDocumento, 
+		fechaDocumento, 
+		horaDocumento, 
+		idArea,
+		descripcionDocumento ,
+		idEstado, 
+		areaVia, 
+		codigoEmpleado, 
+		idPrioridad)
+	VALUES(
+		iddocumento, 
+		(SELECT idTipoDocumento FROM TIPODOCUMENTOS WHERE descripcionTipoDocumento = tipodocumento), 
+		fecha, 
+		hora, 
+		(SELECT idArea FROM AREAS WHERE nombreArea = area), 
+		desrec, 
+		(SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), 
+		(SELECT idArea FROM AREAS WHERE nombreArea = areaVia), 
+		empleado, 
+		(SELECT idPrioridad into idprioridad	FROM PRIORIDADES WHERE descripcionPrioridad = tipoprioridad)
+	);
+	
 END;
 
-CREATE PROCEDURE editarDocumento(in id varchar(10), in iddocumento varchar(10), in tipodocumento int, in fecha date, in hora time, in area text, in desrec text, in estado text, in instvia varchar(10), in empleado varchar(10), tipoprioridad text)
+CREATE PROCEDURE editarDocumento(in id varchar(10), in iddocumento varchar(10), in tipodocumento text, in fecha date, in hora time, in area text, in desrec text, in estado text, in instvia varchar(10), in empleado varchar(10), tipoprioridad text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE	idarea varchar(10);
-	DECLARE idestado int;
-	DECLARE idprioridad int;
-
-	SELECT idPrioridad into idprioridad
-	FROM PRIORIDADES
-	WHERE descripcionPrioridad = tipoprioridad;
-
-	SELECT idArea into idarea
-	FROM AREAS 
-	WHERE nombreArea = area;
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
 	UPDATE DOCUMENTOS
-	SET idDocumento = iddocumento, idTipoDocumento = tipodocumento, fechaDocumento = fecha,	horaDocumento = hora, idArea = idarea, descripcionDocumento = desrec, idEstado = idestado, institutoVia = instvia, codigoEmpleado = empleado, idPrioridad = idprioridad
+	SET 
+		idDocumento = iddocumento, 
+		idTipoDocumento = (SELECT idTipoDocumento FROM TIPODOCUMENTOS WHERE descripcionTipoDocumento = tipodocumento), 
+		fechaDocumento = fecha,	
+		horaDocumento = hora, 
+		idArea = (SELECT idArea FROM AREAS WHERE nombreArea = area), 
+		descripcionDocumento = desrec, 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), 
+		institutoVia = instvia, 
+		codigoEmpleado = empleado, 
+		idPrioridad = (SELECT idPrioridad FROM PRIORIDADES WHERE descripcionPrioridad = tipoprioridad)
 	WHERE idDocumento = id;
 END;
 
 CREATE PROCEDURE desactivarDocumento(in iddocumento varchar(10), in estado text)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
 	UPDATE DOCUMENTOS
-	SET idEstado = idestado
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado)
 	WHERE idDocumento = iddocumento;
 END;
 
@@ -1001,94 +1079,49 @@ END
 CREATE PROCEDURE `editarFotoFacultad`(IN `enlace` TEXT, IN `estado` TEXT, IN `facultad` text, in id int) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-	DECLARE idfacultad varchar(10);
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	SELECT idFacultad into idfacultad
-	FROM FACULTADES
-	WHERE nombreFacultad = facultad;
-
 	UPDATE FOTOFACULTADES
-	SET enlaceFoto = enlace , idEstado = idestado, idFacultad = idfacultad 
+	SET enlaceFoto = enlace , idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), idFacultad = (SELECT idFacultad FROM FACULTADES WHERE nombreFacultad = facultad) 
 	WHERE idFotoFacultad = id;
 END;
 
 CREATE PROCEDURE `desactivarFotoFacultad`(IN `id` INT, IN `estado` text) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
 	UPDATE FOTOFACULTADES
-	SET idEstado = idestado 
+	SET idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado) 
 	WHERE idFotoFacultad = id;
 END;
 
 CREATE PROCEDURE `agregarFotoEmpleados`(IN `enlace` TEXT, IN `empleado` varchar(10), in estado text) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	INSERT INTO FOTOEMPLEADOS(enlaceFoto, idEstado, idEmpleado) 
+	INSERT INTO FOTOEMPLEADOS(enlaceFoto, idEstado, codigoEmpleado) 
 	VALUES(enlace, (SELECT idEstado	FROM ESTADOS WHERE descripcionEstado = estado), empleado);
 END
 
 CREATE PROCEDURE `editarFotoEmpleados`(IN `enlace` TEXT, IN `estado` TEXT, IN `empleado` varchar(10), in id int) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
 	UPDATE FOTOEMPLEADOS 
-	SET enlaceFoto = enlace , idEstado = idestado, idEmpleado = empleado 
+	SET 
+		enlaceFoto = enlace , 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado), 
+		codigoEmpleado = empleado 
 	WHERE idFotoEmpleado = id
 END;
 
 CREATE PROCEDURE `desactivarFotoEmpleados`(IN `id` INT, IN `estado` text) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idestado int;
-
-	SELECT idEstado into idestado
-	FROM ESTADOS
-	WHERE descripcionEstado = estado;
-
-	UPDATE FOTOEMPLEADOS SET idEstado = idestado 
+	UPDATE FOTOEMPLEADOS 
+	SET 
+		idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = estado) 
 	WHERE idFotoEmpleado = id;
 END;
 
 CREATE PROCEDURE `documentoEventoAgregar`(IN `iddocumento` VARCHAR(10), IN `evento` VARCHAR(10), IN `descEven` TEXT, IN `desctipodocumento` TEXT, IN `fecha` DATE, IN `hora` TIME, IN `nombrearea` TEXT, IN `desrec` TEXT, IN `tipoestado` TEXT, IN `areavia` text, IN `empleado` VARCHAR(10), in tipoprioridad text, in estado text) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN 
-	DECLARE tipodocumento int; 
-	DECLARE estado int; 
-	DECLARE area varchar(10); 
-	DECLARE via varchar(10);
-	
-	SELECT idTipoDocumento INTO tipodocumento 
-	FROM DOCUMENTOS 
-	WHERE descripcionTipoDocumento = desctipodocumento; 
-	
-	SELECT idEstado INTO estado 
-	FROM ESTADOS
-	WHERE descripcionEstado = tipoestado; 
-	
-	SELECT idArea INTO area 
-	FROM INSTITUTOS 
-	WHERE nombreArea = nombrearea; 
-	
-	SELECT idArea INTO via 
-	FROM INSTITUTOS 
-	WHERE nombreArea = areavia;
-	
 	call agregarDocumento(iddocumento, desctipodocumento, fecha, hora, nombrearea, desrec,  areavia, empleado, tipoprioridad, estado);
 	call agregarEvento(evento, empleado, iddocumento, descEven, nombrearea, hora, fecha, estado);
 END;
@@ -1096,13 +1129,7 @@ END;
 CREATE PROCEDURE `documentoEventoEditar`(in iddocanterior varchar(10), IN `iddocumento` VARCHAR(10), IN `evento` VARCHAR(10), IN `descEven` TEXT, IN `desctipodocumento` TEXT, IN `fecha` DATE, IN `hora` TIME, IN `nombrearea` TEXT, IN `desrec` TEXT, IN `tipoestado` TEXT, IN `areavia` text, IN `empleado` VARCHAR(10), in prioridad text) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN 
-	DECLARE tipodocumento int; 
-	
-	SELECT idTipoDocumento INTO tipodocumento 
-	FROM DOCUMENTOS 
-	WHERE descripcionTipoDocumento = desctipodocumento; 
-
-	call editarDocumento(iddocanterior, iddocumento, tipodocumento, fecha, hora, nombrearea, desrec, tipoestado, areavia, empleado, prioridad);
+	call editarDocumento(iddocanterior, iddocumento, (SELECT idTipoDocumento FROM DOCUMENTOS WHERE descripcionTipoDocumento = desctipodocumento), fecha, hora, nombrearea, desrec, tipoestado, areavia, empleado, prioridad);
 END;
 
 
@@ -1116,40 +1143,23 @@ END
 CREATE PROCEDURE `enlaceroleditar`(in idenlace int, in idenlacerol int,IN `nombre` TEXT, IN `enlace` TEXT, IN `estado` text, IN `rol` text) 
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN 
-	DECLARE idenlace int; 
-	SELECT idEnlace INTO idenlace 
-	FROM ENLACES 
-	WHERE urlEnlace = enlace 
-	AND nombreEnlace = nombre; 
 	call editarEnlace(idenlace, nombre, enlace, estado);
-	call editarEnlacesRoles(idenlacerol, idenlace, rol);
+	call editarEnlacesRoles(idenlacerol, (SELECT idEnlace FROM ENLACES WHERE urlEnlace = enlace AND nombreEnlace = nombre), rol);
 END;
 
 
-CREATE PROCEDURE agregarConfiguracionFacultad(IN `nombre` TEXT, IN `id` varchar(10), in correo text, in direccion text, in telefono text, in enlacefoto text, IN codigoempleado varchar(10),in area text, in cargo text, in idareaempledo int, in estado text)
+CREATE PROCEDURE agregarConfiguracionFacultad(IN `nombre` TEXT, IN `id` varchar(10), in correo text, in direccion text, in telefono text, in enlacefoto text, IN codigoempleado varchar(10),in area text, in cargo text, in idareaempledo int, in estado text, in fecha date)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idarea varchar(10);
-	
-	SELECT idArea into idarea
-	FROM AREAS
-	WHERE nombreArea = area;
-	
-	call `agregarFacultad`(`nombre`,`id`, correo ,direccion ,telefono ,enlacefoto, estado);
-	call editarAreaEmpleado(area, codigoempleado, cargo, estado ,idareaempledo);
+	call `agregarFacultad`(`nombre`,`id`, correo ,direccion ,telefono ,enlacefoto, estado, fecha);
+	call editarAreaEmpleado((SELECT idArea FROM AREAS WHERE nombreArea = area), codigoempleado, cargo, estado ,idareaempledo);
 END;
 
-CREATE PROCEDURE configuracionFacultadEditar(IN `nombre` TEXT, IN `id` varchar(10),in idfacultad varchar(10), in correo text, in direccion text, in telefono text, in enlacefoto text, IN codigoempleado varchar(10),in area text, in cargo text, in idareaempledo int, in estado text)
+CREATE PROCEDURE configuracionFacultadEditar(IN `nombre` TEXT, IN `id` varchar(10),in idfacultad varchar(10), in correo text, in direccion text, in telefono text, in enlacefoto text, IN codigoempleado varchar(10),in area text, in cargo text, in idareaempledo int, in estado text, in fecha date)
 NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER 
 BEGIN
-	DECLARE idarea varchar(10);
-	
-	SELECT idArea into idarea
-	FROM AREAS
-	WHERE nombreArea = area;
-	
-	call `editarFacultad`(`nombre`, id, correo, direccion, telefono, enlacefoto, `idfacultad`, `estado`);
-	call editarAreaEmpleado(area, codigoempleado, cargo, estado ,idareaempledo);
+	call `editarFacultad`(`nombre`, id, correo, direccion, telefono, enlacefoto, `idfacultad`, `estado`, fecha);
+	call editarAreaEmpleado((SELECT idArea FROM AREAS WHERE nombreArea = area), codigoempleado, cargo, estado ,idareaempledo);
 END;
 
 CREATE PROCEDURE desactivarConfiguracionFacultad(IN `idfacultad` varchar(10),  in idareaempleado int, in estado text)
@@ -1158,6 +1168,9 @@ BEGIN
 	call `desactivarFacultad`(`idfacultad` , `estado` );
 	call desactivarAreaEmpleado( estado, idareaempleado);
 END;
+
+
+
 
 /*
 -- ejemplo
@@ -1234,31 +1247,30 @@ inner join FOTOEMPLEADOS as foto on empleado.codigoEmpleado = foto.codigoEmplead
 WHERE usuario.descripcionUsuario = [usuario] AND usuario.claveUsuario = [clave] AND estado.descripcionEstado = 'ACTIVO';
 
 SELECT 
-	area.nombreArea 'area',
-    area.idArea 'codigoarea',
-    facultad.nombreFacultad 'facultad',
-    facultad.idFacultad 'idFacultad',
-	foto.enlaceFoto 'foto',
-	foto.idFotoEmpleado 'idFoto',
-    empleado.codigoEmpleado 'codigoempleado',
+	areaemp.`idAreaEmpleado` 'id',
+    area.`idArea` 'idarea',
+    area.nombreArea 'nombrearea',
+    facultad.idFacultad 'idfacultad',
+    facultad.nombreFacultad 'nombrefacultad',
+    empleado.`codigoEmpleado` 'codigoempleado',
     empleado.nombreEmpleado 'nombreempleado',
     empleado.apellidoEmpleado 'apellidoempleado',
-    sexo.descripcionSexo 'genero',
     empleado.identificacionEmpleado 'identificacionempleado',
-    identificacion.descripcionIdentificacion 'tipoidentificacion',
-    empleado.telefonoEmpleado 'telefonoempleado',
+    empleado.fechaEntrada 'fechaentrada',
     empleado.correoEmpleado 'correoempleado',
-    cargo.descripcionCargo 'cargoempleado',
-    estado.idEstado 'estado'
-FROM AREAEMPLEADOS as areaemp 
-inner join AREAS as area on areaemp.idArea = area.nombreArea
-inner join FACULTADES as facultad on area.idFacultad = facultad.idFacultad
+    empleado.telefonoEmpleado 'telefonoempleado',
+    identificion.descripcionIdentificacion 'tipoidentificacion',
+    cargo.`idCargo` 'idcargo',
+    cargo.descripcionCargo 'nombrecargo',
+    areaemp.`idEstado`'idestado',
+    estado.descripcionEstado 'nombreestado'
+FROM `AREAEMPLEADOS` as areaemp
 inner join EMPLEADOS as empleado on areaemp.codigoEmpleado = empleado.codigoEmpleado
-inner join FOTOEMPLEADOS as foto on empleado.codigoEmpleado = foto.codigoEmpleado
-inner join SEXOS as sexo on empleado.idSexo = sexo.idSexo
+inner join AREAS as area on areaemp.idArea = area.idArea
+inner join FACULTADES as facultad on area.idFacultad = facultad.idFacultad
 inner join CARGOS as cargo on areaemp.idCargo = cargo.idCargo
 inner join ESTADOS as estado on areaemp.idEstado = estado.idEstado
-inner join IDENTIFICACIONES as identificacion on empleado.idIdentificacion = identificacion.idIdentificacion
+inner join IDENTIFICACIONES as identificion on empleado.idIdentificacion = identificion.idIdentificacion
 WHERE estado.descripcionEstado = [estado] AND facultad.idFacultad = [FACULTAD];
 
 SELECT 
@@ -1318,9 +1330,15 @@ SELECT
     empleado.`apellidoEmpleado` 'apellidoempleado',
     empleado.`telefonoEmpleado` 'telefonoempleado',
     empleado.`correoEmpleado` 'correoempleado',
+    empleado.fechaNacimiento 'nacimiento',
+    empleado.fechaEntrada 'entrada',
     sexo.descripcionSexo 'genero',
 	foto.enlaceFoto 'foto',
-	foto.idFotoEmpleado 'idFoto'
+	foto.idFotoEmpleado 'idFoto',
+    area.nombreArea 'nombrearea',
+    area.idArea 'idarea',
+    facultad.nombreFacultad 'nombrefacultad',
+    facultad.idFacultad 'idfacultad'
 FROM EMPLEADOS AS empleado
 inner join SEXOS AS sexo on empleado.idSexo = sexo.idSexo
 inner join IDENTIFICACIONES AS identificacion on empleado.idIdentificacion = identificacion.idIdentificacion
@@ -1328,4 +1346,5 @@ inner join ESTADOS AS estado on empleado.idEstado = estado.idEstado
 inner join AREAEMPLEADOS AS areaemp on empleado.codigoEmpleado = areaemp.codigoEmpleado
 inner join AREAS AS area on areaemp.idArea = area.idArea
 inner join FOTOEMPLEADOS as foto on empleado.codigoEmpleado = foto.codigoEmpleado
+inner join FACULTADES as facultad on area.idFacultad = facultad.idFacultad
 WHERE estado.descripcionEstado = [ESTADO] AND area.nombreArea = [AREA];

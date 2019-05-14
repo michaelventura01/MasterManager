@@ -9,7 +9,7 @@
         public $respuesta;
         public $mensaje;
         public $answer;
-
+		
 		public function __construct(){
 			$this->host = 'localhost';
 			$this->userName = 'id8696707_root';
@@ -19,15 +19,12 @@
 			$this->query = "";
 			$this->respuesta = 0;
 		}
-
 		public function prueba(){
 			//echo "host: " .$this->host;
 		}
-
 		public function getHost(){
 			return $this->host;
 		}
-
 		public function conectar(){
 			$this->conexion = new mysqli($this->host, $this->userName, $this->password, $this->dataBase);
 			if ($this->conexion->connect_errno){
@@ -35,7 +32,6 @@
                 $mensaje = "Ha ocurrido problemas con el servidor";			
 			}
 		}
-
 		public function desconectar(){
 			mysqli_close($this->conexion);
 		}

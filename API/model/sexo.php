@@ -2,26 +2,33 @@
     require_once("conexion.php");
     require_once("estado.php");
     
-    class Sexos extends Conexion{
+    class Sexo extends Conexion{
         
-        private $id;
+        private $id; 
         private $descripcion;
 
+        private $sexos;
+
+        //relacion
         private $estados;
         
         function __construct(){
 			parent::__construct();
 
 			$this->id = 0;
-            $this->descripcion = 'vacio';
+            $this->descripcion = '';
+            $this->sexos ='';
         }
 
+        public function getSexos(){
+            return $this->sexos;
+        }
         public function getId(){
-            return $id;
+            return $this->id;
         }
         
         public function getDescripcion(){
-            return $descripcion;
+            return $this->descripcion;
         }
 
         public function setId($id){
@@ -33,52 +40,34 @@
         } 
  
         
-        public function agregarSexo($descripcion, $estado){
-            $this->estados = new Estados();
+        public function agregarSexo($estado){
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
             $this->conectar();
-            $this->query = "call agregarSexo($descripcion, $estados->getDescripcion());";
+            $this->query = "call agregarSexo('$this->descripcion', '$estados->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "el genero ha sido agregado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
 
-        public function editarSexo($id, $descripcion, $estado){
-            $this->estados = new Estados();
+        public function editarSexo($estado){
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
             $this->conectar();
-            $this->query = "call editarSexo($id, $descripcion, $estados->getDescripcion());";
+            $this->query = "call editarSexo('$this->id', '$this->descripcion', '$estados->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "el genero ha sido modificado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
 
-        public function desactivarSexo($id, $estado){
-            $this->estados = new Estados();
+        public function desactivarSexo($estado){
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
             $this->conectar();
-            $this->query = "call desactivarSexo($id, $estados->getDescripcion());";
+            $this->query = "call desactivarSexo('$this->id', '$estados->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "el genero ha sido modificado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
         
         public function verSexos(){
@@ -91,38 +80,33 @@
 
 			$resultSet = mysqli_query($this->conexion, $this->query);
 
-            $this->estados = array();
-
-			while($fila = mysqli_fetch_array($resultSet)){
+            $this->sexos = array();
+            
+            while($fila = mysqli_fetch_array($resultSet)){
 				$arreglo = array(
 					'id' => $fila['id'],
 					'descripcion' => $fila['descripcion']
 				);
 
-				array_push($this->estados, $arreglo);
+				array_push($this->sexos, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
 			$this->desconectar();
         }
 
         public function verSexosActivos($estado){
-            $this->estados = new Estados();
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
-
             $this->conectar();
-
 			$this->query = "SELECT 
                                 idSexo as 'id', 
                                 descripcionSexo as 'descripcion' 
                             FROM SEXOS
-                            WHERE idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = $estado->getDescripcion())";
+                            WHERE idEstado = (SELECT idEstado FROM ESTADOS WHERE descripcionEstado = '$estados->getDescripcion()')";
 
 			$resultSet = mysqli_query($this->conexion, $this->query);
 
-            $this->estados = array();
+            $this->sexos = array();
 
 			while($fila = mysqli_fetch_array($resultSet)){
 				$arreglo = array(
@@ -130,11 +114,8 @@
 					'descripcion' => $fila['descripcion']
 				);
 
-				array_push($this->estados, $arreglo);
+				array_push($this->sexos, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
 			$this->desconectar();
         }
     }

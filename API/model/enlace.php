@@ -4,105 +4,89 @@
     require_once("rol.php");
    
     class Enlace extends Conexion{
-
-
        
-
         private $id;
         private $nombre;
         private $url;
-      
-        private $estados;
-        private $roles; //relacion
 
+        private $enlaces;
+        
+        //relacion
+        private $estados;
+        private $roles; 
+        
         function __construct(){
 			parent::__construct();
-
 			$this->id = 0;
-            $this->nombre = 'vacio';
-            $this->url = 'vacio';
+            $this->nombre = '';
+            $this->url = '';
+            $this->enlaces = '';
         }
-
         public function setId($id){
             $this->id = $id;
         }
-
         public function setNombre($nombre){
             $this->nombre = $nombre;
         }
-
         public function setUrl($url){
             $this->url = $url;
+        }
+
+        public function getEnlaces(){
+            return $this->enlaces;
         }
 
         public function getId(){
             return $this->id;
         }
-
         public function getNombre(){
             return $this->nombre;
         }
-
         public function getUrl(){
             return $this->url;
         }
  
-        public function agregarEnlace($nombre, $enlace, $estado, $rol, $idenlacerol){
-            $this->estados = new Estados();
+        public function agregarEnlace($estado, $rol){
+            
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
 
-            $this->conectar();
-            $this->query = "call agregarEnlace($nombre, $enlace, $estados->getDescripcion());
-                            call agregarEnlacesRoles((SELECT idEnlace FROM ENLACES WHERE nombreEnlace = $nombre AND urlEnlace = $enlace), $rol);";
-			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
+            $this->roles = new Rol();
+            $roles->setDescripcion($rol);
 
-            $this->respuesta = 2;	
-            $this->mensaje = "el enlace ha sido agregado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+            $this->conectar();
+            $this->query = "enlacerolagregar`('$this->nombre', '$this->url', '$estados->getDescripcion()', '$roles->setDescripcion()');";
+			$this->conexion->query($this->query);
+			$this->desconectar();
+        }
+        
+        public function editarEnlace($idenlacerol,$estado, $rol){
+            
+            $this->estados = new Estado();
+            $estados->setDescripcion($estado);
+
+            $this->roles = new Rol();
+            $roles->setDescripcion($rol);
+
+            $this->conectar();
+            $this->query = "call `enlaceroleditar`('$this->id', '$idenlacerol', '$this->nombre', '$this->url', '$estados->getDescripcion()', '$roles->getDescripcion()'); ";
+			$this->conexion->query($this->query);
+			$this->desconectar();
         }
 
-        public function editarEnlace($id, $nombre, $enlace, $estado, $rol){
-            $this->estados = new Estados();
-            $estados->setDescripcion($estado);
-
-            $this->conectar();
-            $this->query = "call editarEnlace($id, $nombre, $enlace, $estados->getDescripcion());
-                            call editarEnlacesRoles($idenlacerol, $id, $rol);";
-			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
+        public function desactivarEnlace($estado){
             
-            $this->respuesta = 2;	
-            $this->mensaje = "el enlace ha sido modificado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
-        }
-
-        //CREATE PROCEDURE desactivarEnlace(IN id text, in estado text)
-
-
-        public function desactivarEnlace($id, $estado){
-            $this->estados = new Estados();
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
-
             $this->conectar();
-            $this->query = "call desactivarEnlace($id, $estados->getDescripcion());";
+            $this->query = "call desactivarEnlace('$this->id', '$estados->getDescripcion()');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "el enlace ha sido modificado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
         
         public function verEnlaces(){
+            
             $this->conectar();
-
 			$this->query = "SELECT  enlace.idenlace as 'id', 
                                     enrol.idEnlaceRol as 'idenrol', 
                                     enlace.nombreEnlace as 'nombre',
@@ -114,12 +98,11 @@
                             inner join ROLES rol on enrol.idRol = rol.idRol
                             inner join ESTADOS estado on enlace.idEstado = estado.idEstado
                             ";
-
 			$resultSet = mysqli_query($this->conexion, $this->query);
-
-            $this->estados = array();
-
-			while($fila = mysqli_fetch_array($resultSet)){
+            
+            $this->enlaces = array();
+            
+            while($fila = mysqli_fetch_array($resultSet)){
 				$arreglo = array(
                     'id' => $fila['id'],
                     'enrol' => $fila['enrol'],
@@ -128,21 +111,16 @@
                     'rol' => $fila['rol'],
                     'estado' => $fila['estado']
 				);
-
-				array_push($this->estados, $arreglo);
+				array_push($this->enlaces, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
-			$this->desconectar();
         }
 
         public function verEnlaceActivos($estado){
-            $this->estados = new Estados();
+            
+            $this->estados = new Estado();
             $estados->setDescripcion($estado);
             
             $this->conectar();
-
 			$this->query = "SELECT  enlace.idenlace as 'id',
                                     enrol.idEnlaceRol as 'idenrol', 
                                     enlace.nombreEnlace as 'nombre',
@@ -153,13 +131,12 @@
                             INNER JOIN ENLACESROLES enrol on enlace.idenlace = enrol.idEnlace
                             inner join ROLES rol on enrol.idRol = rol.idRol
                             inner join ESTADOS estado on enlace.idEstado = estado.idEstado
-                            WHERE enlace.idEstado = (SELECT idEstado from ESTADOS where descripcionEstado = $estado);";
-
+                            WHERE enlace.idEstado = (SELECT idEstado from ESTADOS where descripcionEstado = '$estados->setDescripcion()');";
 			$resultSet = mysqli_query($this->conexion, $this->query);
-
-            $this->estados = array();
-
-			while($fila = mysqli_fetch_array($resultSet)){
+            
+            $this->enlaces = array();
+            
+            while($fila = mysqli_fetch_array($resultSet)){
 				$arreglo = array(
                     'id' => $fila['id'],
                     'enrol' => $fila['enrol'],
@@ -168,13 +145,8 @@
                     'rol' => $fila['rol'],
                     'estado' => $fila['estado']
 				);
-
-				array_push($this->estados, $arreglo);
+				array_push($this->enlaces, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
-			$this->desconectar();
         }
     }
 ?>

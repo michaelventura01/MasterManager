@@ -2,23 +2,26 @@
     require_once("conexion.php");
 
     class Estado extends Conexion{
-        private $id; //entero
-        private $descripcion; //text
-        private $estado; //entero
+        private $id; 
+        private $descripcion; 
+        private $estado;
+
+        private $estados;
 
         function __construct(){
 			parent::__construct();
 
 			$this->id = 0;
             $this->estado = 0;
-            $this->descripcion = 'inactivo';
+            $this->descripcion = '';
+            $this->estados = '';
         }
         
         public function setEstado($estado){
 			$this->estado = $estado;
         }
         
-        public function setDesripcion($descripcion){
+        public function setDescripcion($descripcion){
 			$this->descripcion = $descripcion;
         }
         
@@ -30,51 +33,37 @@
 			return $this->estado;
         }
         
-        public function getDesripcion(){
+        public function getDescripcion(){
 			return $this->descripcion;
         }
         
         public function getId(){
 			return $this->id;
-		}
+        }
+        
+        public function getEstados(){
+            return $this->estados;
+        }
 
 		public function agregarEstado(){
             $this->conectar();
-            $this->query = "CALL agregarEstado($this->descripcion);";
+            $this->query = "CALL agregarEstado('$this->descripcion');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-            
-            $this->respuesta = 2;	
-            $this->mensaje = "el estado ha sido agregado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
 
         public function editarEstado(){
             $this->conectar();
-            $this->query = "CALL editarEstado($this->descripcion, $this->id, $this->estado);";
+            $this->query = "CALL editarEstado('$this->descripcion', '$this->id', '$this->estado');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-
-            $this->respuesta = 2;	
-            $this->mensaje = "el estado ha sido actualizado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
 
         public function desactivarEstado(){
 			$this->conectar();
-            $this->query = "CALL desactivarEstado($this->id, $this->estado);";
+            $this->query = "CALL desactivarEstado('$this->id', '$this->estado');";
 			$this->conexion->query($this->query);
-			$this->idCliente = mysqli_insert_id($this->conexion);
-            $this->desconectar();
-
-            $this->respuesta = 2;	
-            $this->mensaje = "el estado ha sido actualizado";
-            $this->answer = array($respuesta, $mensaje);
-            return $this->answer;
+			$this->desconectar();
         }
         
         public function verEstados(){
@@ -97,9 +86,6 @@
 
 				array_push($this->estados, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
 			$this->desconectar();
         }
 
@@ -110,7 +96,7 @@
                                 idEstado as 'id', 
                                 descripcionEstado as 'descripcion' 
                             FROM ESTADOS
-                            WHERE estado = $this->estado";
+                            WHERE estado = '$this->estado'";
                             
 			$resultSet = mysqli_query($this->conexion, $this->query);
 
@@ -124,9 +110,6 @@
 
 				array_push($this->estados, $arreglo);
 			}
-
-			$this->respuesta = 2;
-
 			$this->desconectar();
         }
         
